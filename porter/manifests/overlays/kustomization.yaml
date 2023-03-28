@@ -1,0 +1,6 @@
+namePrefix: dev-
+resources:
+  - ../../base
+patchesStrategicMerge:
+  - deployment.yaml
+  - serviceaccount.yaml
