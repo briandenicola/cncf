@@ -1,0 +1,6 @@
+[submodule "porter/cluster"]
+	path = porter/cluster
+	url = https://github.com/briandenicola/aks-flux-extension
+[submodule "knative/infrastructure"]
+	path = knative/infrastructure
+	url = https://github.com/briandenicola/aks-flux-extension
