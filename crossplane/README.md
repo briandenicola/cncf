@@ -48,12 +48,12 @@ This repository is a demonstration of using Crossplane/Upbound with KubeVela in 
 
     kubectl apply -f ./manifests/crossplane/aksclaim.yaml
 
-    kubectl get get aksclusters.containers.bjdazure.tech/aks03
+    kubectl get aksclusters.containers.bjdazure.tech/aks03
     NAME    SYNCED   READY   CONNECTION-SECRET   AGE
     aks03   True     False                       32s
 
     ...
-    kubectl get get aksclusters.containers.bjdazure.tech/aks03
+    kubectl get aksclusters.containers.bjdazure.tech/aks03
     NAME    SYNCED   READY   CONNECTION-SECRET   AGE
     aks03   True     True                        32s
 
