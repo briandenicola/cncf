@@ -139,7 +139,7 @@ spec:
               maxPods: 40
               osDiskSizeGb: 30
               osSku: CBLMariner
-          kubernetesVersion: "1.24.6"
+          kubernetesVersion: "1.26.0"
           networkProfile:
           - dnsServiceIp: "100.99.0.10"
             dockerBridgeCidr: 172.17.0.1/16
