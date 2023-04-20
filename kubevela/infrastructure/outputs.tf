@@ -1,10 +1,10 @@
 output "AKS_RESOURCE_GROUP" {
-  value     = azurerm_kubernetes_cluster.controlplane.resource_group_name
+  value     = azurerm_kubernetes_cluster.aks.resource_group_name
   sensitive = false
 }
 
-output "CONTROLPLANE_AKS_CLUSTER_NAME" {
-  value     = azurerm_kubernetes_cluster.controlplane.name
+output "AKS_CLUSTER_NAME" {
+  value     = azurerm_kubernetes_cluster.aks.name
   sensitive = false
 }
 

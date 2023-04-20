@@ -21,7 +21,7 @@ tasks:
       RG: 
         sh: terraform -chdir=./infrastructure output -raw AKS_RESOURCE_GROUP
       CP_AKS: 
-        sh: terraform -chdir=./infrastructure output -raw CONTROLPLANE_AKS_CLUSTER_NAME
+        sh: terraform -chdir=./infrastructure output -raw AKS_CLUSTER_NAME
 
   down:
     desc: Destroys all Azure resources and cleans up terraform

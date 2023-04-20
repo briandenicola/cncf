@@ -23,26 +23,20 @@ resource "random_integer" "vnet_cidr" {
   max = 250
 }
 
-resource "random_integer" "controlplane_services_cidr" {
-  min = 64
-  max = 127
-}
-
-resource "random_integer" "workload_services_cidr" {
+resource "random_integer" "services_cidr" {
   min = 64
   max = 127
 }
 
 locals {
-  location                  = var.region
-  resource_name             = "${random_pet.this.id}-${random_id.this.dec}"
-  controlplane_name         = "${local.resource_name}-controlplane"
-  aks_name                  = "${local.resource_name}-workload"
-  flux_repository           = "https://github.com/briandenicola/cncf"
-  mgmt_cluster_cfg_path     = "./crossplane/infrastructure/cluster-config"
-  vnet_cidr                 = cidrsubnet("10.0.0.0/8", 8, random_integer.vnet_cidr.result)
-  controlplane_subnet_cidr  = cidrsubnet(local.vnet_cidr, 8, 2)
-  workload_subnet_cidr      = cidrsubnet(local.vnet_cidr, 8, 3)
+  location                 = var.region
+  resource_name            = "${random_pet.this.id}-${random_id.this.dec}"
+  aks_name                 = "${local.resource_name}-aks"
+  flux_repository          = "https://github.com/briandenicola/cncf"
+  mgmt_cluster_cfg_path    = "./crossplane/infrastructure/cluster-config"
+  vnet_cidr                = cidrsubnet("10.0.0.0/8", 8, random_integer.vnet_cidr.result)
+  aks_subnet_cidr          = cidrsubnet(local.vnet_cidr, 8, 2)
+
 }
 
 resource "azurerm_resource_group" "this" {
