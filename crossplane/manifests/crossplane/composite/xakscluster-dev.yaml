@@ -36,9 +36,15 @@ spec:
                     - northcentralus
                   aksId:
                     type: string
+                  clusterConfigurationUri:
+                    type: string
+                  clusterConfigruationPath:
+                    type: string
                 required:
                 - nodeCount
                 - name
                 - location
+                - clusterConfigurationUri
+                - clusterConfigruationPath
             required:
             - parameters

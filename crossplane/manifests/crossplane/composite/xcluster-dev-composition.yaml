@@ -218,7 +218,7 @@ spec:
       toFieldPath: spec.forProvider.nodeResourceGroup
       policy:
         fromFieldPath: Required
-  - name: azure-flux-extension-install
+  - name: azure-flux-extension-install-and-configuration
     base:
       apiVersion: resources.azure.upbound.io/v1beta1
       kind: ResourceGroupTemplateDeployment
@@ -240,6 +240,12 @@ spec:
             ${jsonencode({
               "aksId" = {
                 value = "fq-cluster-resource-id"
+              },
+              "clusterConfigurationUri" ={
+                value = "https://github.com/example/"
+              },
+              "clusterConfigruationPath" ={
+                value = "./some/path/under/example/repo"
               }
             })}
           templateContent: |-
@@ -251,6 +257,18 @@ spec:
                     "type": "String",
                     "metadata": {
                       "description": "Resource Id of the AKS Cluster"
+                    }
+                  },
+                  "clusterConfigurationUri": {
+                    "type": "String",
+                    "metadata": {
+                      "description": "Location of the Git repostory for cluster confgurations"
+                    }
+                  },
+                  "clusterConfigruationPath": {
+                    "type": "String",
+                    "metadata": {
+                      "description": "Path of the cluster confgurations kustomize files"
                     }
                   }
               },
@@ -274,6 +292,36 @@ spec:
                       }
                     }
                   }
+                },
+                {
+                  "type": "Microsoft.KubernetesConfiguration/fluxConfigurations",
+                  "apiVersion": "2022-03-01",
+                  "name": "fluxconfiguration",
+                  "scope": "[parameters('aksId')]",
+                  "properties": {
+                    "scope": "cluster",
+                    "namespace": "flux-system",
+                    "sourceKind": "GitRepository",
+                    "suspend": false,
+                    "gitRepository": {
+                      "url": "[parameters('clusterConfigurationUri')]",
+                      "timeoutInSeconds": 600,
+                      "syncIntervalInSeconds": 300,
+                      "repositoryRef": {
+                        "branch": "main"
+                      }
+                    },
+                    "kustomizations": {
+                      "cluster-config": {
+                        "path": "[parameters('clusterConfigruationPath')]",
+                        "dependsOn": [],
+                        "timeoutInSeconds": 600,
+                        "syncIntervalInSeconds": 120,
+                        "retryIntervalInSeconds": 300,
+                        "prune": true
+                      }
+                    }
+                  }
                 }
               ],
               "outputs": {}
@@ -283,7 +331,9 @@ spec:
       combine:
         variables:
         - fromFieldPath: spec.parameters.aksId
+        - fromFieldPath: spec.parameters.clusterConfigurationUri
+        - fromFieldPath: spec.parameters.clusterConfigruationPath
         strategy: string
         string:
-          fmt: ${jsonencode({ "aksId" = { value = "%s" } })}
+          fmt: ${jsonencode({ "aksId" = { value = "%s" }, "clusterConfigurationUri" = { value = "%s" }, "clusterConfigruationPath" ={ value = "%s" }})}
       toFieldPath: spec.forProvider.parametersContent
