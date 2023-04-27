@@ -2,11 +2,12 @@ apiVersion: containers.bjdazure.tech/v1alpha1
 kind: AKSCluster
 metadata:
   namespace: default
-  name: my-aks
+  name: bjdaks02
 spec:
   compositionRef:
     name: xcluster-dev
   parameters:
     location: southcentralus
-    name: my-aks
+    name: bjdaks02
     nodeCount: 2
+
