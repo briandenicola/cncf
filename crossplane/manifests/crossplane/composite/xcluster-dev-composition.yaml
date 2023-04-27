@@ -6,7 +6,7 @@ metadata:
     crossplane.io/xrd: xaksclusters.containers.bjdazure.tech
     provider: azure
 spec:
-  writeConnectionSecretsToNamespace: crossplane-system
+  writeConnectionSecretsToNamespace: upbound-system
   compositeTypeRef:
     apiVersion: containers.bjdazure.tech/v1alpha1
     kind: XAKSCluster
@@ -71,6 +71,7 @@ spec:
         name: private-endpoints
         labels:
           meta.upbound.io/type: azure-virtual-subnet
+          meta.upbound.io/subnet-for: private-endpoints
       spec:
         providerConfigRef:
           name: azure
@@ -85,15 +86,38 @@ spec:
             matchLabels:
               meta.upbound.io/vnet-name: crossplane-vnet
               meta.upbound.io/type: azure-virtual-network
-  - name: azure-subnet-kubernetes
+  - name: azure-subnet-kubernetes-nodes
     base:
       apiVersion: network.azure.upbound.io/v1beta1
       kind: Subnet
       metadata:
-        name: kubernetes
+        name: kubernetes-nodes
         labels:
           meta.upbound.io/type: azure-virtual-subnet
-          meta.upbound.io/subnet-for: akscluster
+          meta.upbound.io/subnet-for: akscluster-nodes
+      spec:
+        providerConfigRef:
+          name: azure
+        forProvider:
+          addressPrefixes:
+            - 10.183.3.0/24
+          resourceGroupNameSelector:
+            matchLabels:
+              meta.upbound.io/rg-name: crossplane-demo-rg
+              meta.upbound.io/type: azure-resource-group
+          virtualNetworkNameSelector:
+            matchLabels:
+              meta.upbound.io/vnet-name: crossplane-vnet
+              meta.upbound.io/type: azure-virtual-network
+  - name: azure-subnet-kubernetes-api
+    base:
+      apiVersion: network.azure.upbound.io/v1beta1
+      kind: Subnet
+      metadata:
+        name: kubernetes-api-server
+        labels:
+          meta.upbound.io/type: azure-virtual-subnet
+          meta.upbound.io/subnet-for: akscluster-api-server
       spec:
         providerConfigRef:
           name: azure
@@ -121,9 +145,18 @@ spec:
         providerConfigRef:
           name: azure
         forProvider:
+          #apiServerAccessProfile:
+          #- vnetIntegrationEnabled: true
+          #  subnetIdSelector:
+          #    matchLabels:
+          #      meta.upbound.io/type: azure-virtual-subnet
+          #      meta.upbound.io/subnet-for: akscluster-api-server
           azurePolicyEnabled: true
+          automaticChannelUpgrade: "patch"
           oidcIssuerEnabled: true
+          skuTier: Free
           workloadIdentityEnabled: true
+          runCommandEnabled: true
           localAccountDisabled: true
           azureActiveDirectoryRoleBasedAccessControl:
           - azureRbacEnabled: true 
@@ -133,21 +166,23 @@ spec:
               vnetSubnetIdSelector:
                 matchLabels:
                   meta.upbound.io/type: azure-virtual-subnet
-                  meta.upbound.io/subnet-for: akscluster
+                  meta.upbound.io/subnet-for: akscluster-nodes
               vmSize: Standard_B4ms
               nodeCount: 1
               maxPods: 40
-              osDiskSizeGb: 30
+              osDiskSizeGb: 100
               osSku: CBLMariner
           kubernetesVersion: "1.26.0"
           networkProfile:
-          - dnsServiceIp: "100.99.0.10"
+          - serviceCidr: 100.64.0.0/16
+            dnsServiceIp: "100.64.0.10"
+            podCidr: 100.62.0.0/16
             dockerBridgeCidr: 172.17.0.1/16
             loadBalancerSku: standard
             networkPlugin: azure
-            serviceCidr: 100.99.0.0/16
+            networkPluginMode: Overlay
           identity:
-            - type: SystemAssigned
+          - type: SystemAssigned
           resourceGroupNameSelector:
             matchLabels:
               meta.upbound.io/rg-name: crossplane-demo-rg
@@ -155,6 +190,9 @@ spec:
         writeConnectionSecretToRef:
           namespace: upbound-system
     patches:
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.id
+      toFieldPath: spec.parameters.aksId
     - type: FromCompositeFieldPath
       fromFieldPath: spec.parameters.location
       toFieldPath: spec.forProvider.location
@@ -180,3 +218,72 @@ spec:
       toFieldPath: spec.forProvider.nodeResourceGroup
       policy:
         fromFieldPath: Required
+  - name: azure-flux-extension-install
+    base:
+      apiVersion: resources.azure.upbound.io/v1beta1
+      kind: ResourceGroupTemplateDeployment
+      metadata:
+        name: flux
+        labels:
+          meta.upbound.io/rg-name: crossplane-demo-rg
+          meta.upbound.io/type: azure-kubernetes-flux-extension
+      spec:
+        providerConfigRef:
+          name: azure
+        forProvider:
+          deploymentMode: Incremental
+          resourceGroupNameSelector:
+            matchLabels:
+              meta.upbound.io/rg-name: crossplane-demo-rg
+              meta.upbound.io/type: azure-resource-group
+          parametersContent: |-
+            ${jsonencode({
+              "aksId" = {
+                value = "fq-cluster-resource-id"
+              }
+            })}
+          templateContent: |-
+            {
+              "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                  "aksId": {
+                    "type": "String",
+                    "metadata": {
+                      "description": "Resource Id of the AKS Cluster"
+                    }
+                  }
+              },
+              "variables": {},
+              "resources": [
+                {
+                  "type": "Microsoft.KubernetesConfiguration/extensions",
+                  "apiVersion": "2022-03-01",
+                  "name": "flux",
+                  "scope": "[parameters('aksId')]",
+                  "identity": {
+                    "type": "SystemAssigned"
+                  },
+                  "properties": {
+                    "extensionType": "microsoft.flux",
+                    "autoUpgradeMinorVersion": true,
+                    "releaseTrain": "stable",
+                    "scope": {
+                      "cluster": {
+                        "releaseNamespace": "flux-system"
+                      }
+                    }
+                  }
+                }
+              ],
+              "outputs": {}
+            }
+    patches:
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.parameters.aksId
+        strategy: string
+        string:
+          fmt: ${jsonencode({ "aksId" = { value = "%s" } })}
+      toFieldPath: spec.forProvider.parametersContent
