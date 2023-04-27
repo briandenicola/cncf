@@ -41,7 +41,7 @@ locals {
   flux_repository                = "https://github.com/briandenicola/cncf"
   mgmt_cluster_cfg_path          = "./crossplane/infrastructure/cluster-config/management"
   crossplane_cfg_path            = "./crossplane/infrastructure/cluster-config/management/upbound-providers"
-  crossplane_creds_path          = "./crossplane/infrastructure/cluster-config/management/upbound-providers-config"
+  crossplane_compositions_path   = "./crossplane/infrastructure/cluster-config/management/upbound-providers-config"
   vnet_cidr                      = cidrsubnet("10.0.0.0/8", 8, random_integer.vnet_cidr.result)
   controlplane_nodes_subnet_cidr = cidrsubnet(local.vnet_cidr, 8, 2)
   controlplane_api_subnet_cidir  = cidrsubnet(local.vnet_cidr, 12, 1)
