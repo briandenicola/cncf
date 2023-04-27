@@ -25,26 +25,26 @@ resource "random_integer" "vnet_cidr" {
 
 resource "random_integer" "controlplane_services_cidr" {
   min = 64
-  max = 127
+  max = 99
 }
 
-resource "random_integer" "workload_services_cidr" {
-  min = 64
+resource "random_integer" "controlplane_pod_cidr" {
+  min = 100
   max = 127
 }
 
 locals {
-  location                  = var.region
-  resource_name             = "${random_pet.this.id}-${random_id.this.dec}"
-  controlplane_name         = "${local.resource_name}-controlplane"
-  aks_name                  = "${local.resource_name}-workload"
-  flux_repository           = "https://github.com/briandenicola/cncf"
-  mgmt_cluster_cfg_path     = "./crossplane/infrastructure/cluster-config/management"
-  crossplane_cfg_path       = "./crossplane/infrastructure/cluster-config/management/upbound-providers"
-  crossplane_creds_path     = "./crossplane/infrastructure/cluster-config/management/upbound-providers-config"
-  vnet_cidr                 = cidrsubnet("10.0.0.0/8", 8, random_integer.vnet_cidr.result)
-  controlplane_subnet_cidr  = cidrsubnet(local.vnet_cidr, 8, 2)
-  workload_subnet_cidr      = cidrsubnet(local.vnet_cidr, 8, 3)
+  location                       = var.region
+  resource_name                  = "${random_pet.this.id}-${random_id.this.dec}"
+  controlplane_name              = "${local.resource_name}-controlplane"
+  aks_name                       = "${local.resource_name}-workload"
+  flux_repository                = "https://github.com/briandenicola/cncf"
+  mgmt_cluster_cfg_path          = "./crossplane/infrastructure/cluster-config/management"
+  crossplane_cfg_path            = "./crossplane/infrastructure/cluster-config/management/upbound-providers"
+  crossplane_creds_path          = "./crossplane/infrastructure/cluster-config/management/upbound-providers-config"
+  vnet_cidr                      = cidrsubnet("10.0.0.0/8", 8, random_integer.vnet_cidr.result)
+  controlplane_nodes_subnet_cidr = cidrsubnet(local.vnet_cidr, 8, 2)
+  controlplane_api_subnet_cidir  = cidrsubnet(local.vnet_cidr, 12, 1)
 }
 
 resource "azurerm_resource_group" "this" {
@@ -52,7 +52,7 @@ resource "azurerm_resource_group" "this" {
   location = local.location
 
   tags = {
-    Application = "tbd"
+    Application = "helloworld"
     Components  = "aks; kubevela; crossplane; oam"
     DeployedOn  = timestamp()
     Deployer    = data.azurerm_client_config.current.object_id

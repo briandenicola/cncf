@@ -11,14 +11,16 @@ resource "azurerm_kubernetes_cluster" "controlplane" {
   node_resource_group               = "${local.resource_name}_controlplane_nodes_rg"
   dns_prefix                        = local.controlplane_name
   kubernetes_version                = data.azurerm_kubernetes_service_versions.current.latest_version
-  sku_tier                          = "Free"
+  sku_tier                          = "Standard"
   oidc_issuer_enabled               = true
   workload_identity_enabled         = true
-  open_service_mesh_enabled         = true
+  open_service_mesh_enabled         = false
   azure_policy_enabled              = true
   local_account_disabled            = true
   role_based_access_control_enabled = true
   automatic_channel_upgrade         = "patch"
+  image_cleaner_enabled             = true
+  image_cleaner_interval_hours      = 48
 
   azure_active_directory_role_based_access_control {
     managed                = true
@@ -39,7 +41,9 @@ resource "azurerm_kubernetes_cluster" "controlplane" {
   }
 
   api_server_access_profile {
-    authorized_ip_ranges   = ["${chomp(data.http.myip.response_body)}/32"]
+    vnet_integration_enabled = true
+    subnet_id                = azurerm_subnet.api.id
+    authorized_ip_ranges     = ["${chomp(data.http.myip.response_body)}/32"]
   }
 
   default_node_pool {
@@ -55,16 +59,17 @@ resource "azurerm_kubernetes_cluster" "controlplane" {
     max_count           = 3
     max_pods            = 40
     upgrade_settings {
-      max_surge = "25%"
+      max_surge = "33%"
     }
   }
 
   network_profile {
-    dns_service_ip     = "100.${random_integer.controlplane_services_cidr.id}.0.10"
-    service_cidr       = "100.${random_integer.controlplane_services_cidr.id}.0.0/16"
-    docker_bridge_cidr = "172.17.0.1/16"
-    network_plugin     = "azure"
-    load_balancer_sku  = "standard"
+    dns_service_ip      = "100.${random_integer.controlplane_services_cidr.id}.0.10"
+    service_cidr        = "100.${random_integer.controlplane_services_cidr.id}.0.0/16"
+    pod_cidr            = "100.${random_integer.controlplane_pod_cidr.id}.0.0/16"
+    network_plugin      = "azure"
+    network_plugin_mode = "Overlay"
+    load_balancer_sku   = "standard"
   }
 
   oms_agent {
@@ -81,7 +86,7 @@ resource "azurerm_kubernetes_cluster" "controlplane" {
   }
 
   workload_autoscaler_profile {
-    keda_enabled        = true
+    keda_enabled = true
   }
 
 }

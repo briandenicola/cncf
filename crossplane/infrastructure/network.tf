@@ -9,14 +9,25 @@ resource "azurerm_subnet" "controlplane" {
   name                 = "controlplane"
   resource_group_name  = azurerm_resource_group.this.name
   virtual_network_name = azurerm_virtual_network.this.name
-  address_prefixes     = [local.controlplane_subnet_cidr]
+  address_prefixes     = [local.controlplane_nodes_subnet_cidr]
 }
 
-resource "azurerm_subnet" "workload" {
-  name                 = "workload-cluster"
+resource "azurerm_subnet" "api" {
+  name                 = "api-severver"
   resource_group_name  = azurerm_resource_group.this.name
   virtual_network_name = azurerm_virtual_network.this.name
-  address_prefixes     = [local.workload_subnet_cidr]
+  address_prefixes     = [local.controlplane_api_subnet_cidir]
+
+  delegation {
+    name = "aks-delegation"
+
+    service_delegation {
+      name = "Microsoft.ContainerService/managedClusters"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+      ]
+    }
+  }
 }
 
 resource "azurerm_network_security_group" "this" {
@@ -42,7 +53,7 @@ resource "azurerm_subnet_network_security_group_association" "controlplane" {
   network_security_group_id = azurerm_network_security_group.this.id
 }
 
-resource "azurerm_subnet_network_security_group_association" "workload" {
-  subnet_id                 = azurerm_subnet.workload.id
+resource "azurerm_subnet_network_security_group_association" "api" {
+  subnet_id                 = azurerm_subnet.api.id
   network_security_group_id = azurerm_network_security_group.this.id
 }
