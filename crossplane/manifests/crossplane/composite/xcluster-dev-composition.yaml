@@ -169,6 +169,9 @@ spec:
                   meta.upbound.io/subnet-for: akscluster-nodes
               vmSize: Standard_B4ms
               nodeCount: 1
+              enableAutoScaling: true
+              minCount: 1
+              maxCount: 3
               maxPods: 40
               osDiskSizeGb: 100
               osSku: CBLMariner
@@ -206,7 +209,10 @@ spec:
       toFieldPath: spec.forProvider.dnsPrefix
     - type: FromCompositeFieldPath
       fromFieldPath: spec.parameters.name
-      toFieldPath: spec.writeConnectionSecretToRef.name
+      toFieldPath: spec.forProvider.dnsPrefix
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.nodeCount
+      toFieldPath: spec.defaultNodePool.nodeCount
     - type: CombineFromComposite
       combine:
         variables:
