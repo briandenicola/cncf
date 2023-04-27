@@ -56,7 +56,7 @@ metadata:
   name: httpbinsvc
   namespace: apps
   annotations:
-   service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
   selector:
     app: httpbin
