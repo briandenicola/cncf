@@ -145,13 +145,6 @@ spec:
         providerConfigRef:
           name: azure
         forProvider:
-          #apiServerAccessProfile:
-          #- vnetIntegrationEnabled: true
-          #  subnetIdSelector:
-          #    matchLabels:
-          #      meta.upbound.io/type: azure-virtual-subnet
-          #      meta.upbound.io/subnet-for: akscluster-api-server
-          azurePolicyEnabled: true
           automaticChannelUpgrade: "patch"
           oidcIssuerEnabled: true
           skuTier: Free
@@ -196,6 +189,9 @@ spec:
     - type: ToCompositeFieldPath
       fromFieldPath: status.atProvider.id
       toFieldPath: spec.parameters.aksId
+    - type: FromCompositeFieldPath
+      fromFieldPath: spec.parameters.name
+      toFieldPath: spec.writeConnectionSecretToRef.name
     - type: FromCompositeFieldPath
       fromFieldPath: spec.parameters.location
       toFieldPath: spec.forProvider.location
@@ -250,7 +246,10 @@ spec:
               "clusterConfigurationUri" ={
                 value = "https://github.com/example/"
               },
-              "clusterConfigruationPath" ={
+              "clusterCommonConfigruationPath" ={
+                value = "./some/path/under/example/common"
+              },
+              "clusterAppsConfigruationPath" ={
                 value = "./some/path/under/example/repo"
               }
             })}
@@ -271,10 +270,16 @@ spec:
                       "description": "Location of the Git repostory for cluster confgurations"
                     }
                   },
-                  "clusterConfigruationPath": {
+                  "clusterCommonConfigruationPath": {
                     "type": "String",
                     "metadata": {
-                      "description": "Path of the cluster confgurations kustomize files"
+                      "description": "Path of the common cluster confgurations kustomize files"
+                    }
+                  },
+                  "clusterAppsConfigruationPath": {
+                    "type": "String",
+                    "metadata": {
+                      "description": "Path of the application cluster confgurations kustomize files"
                     }
                   }
               },
@@ -319,8 +324,18 @@ spec:
                     },
                     "kustomizations": {
                       "cluster-config": {
-                        "path": "[parameters('clusterConfigruationPath')]",
+                        "path": "[parameters('clusterCommonConfigruationPath')]",
                         "dependsOn": [],
+                        "timeoutInSeconds": 600,
+                        "syncIntervalInSeconds": 120,
+                        "retryIntervalInSeconds": 300,
+                        "prune": true
+                      },
+                      "apps": {
+                        "path": "[parameters('clusterAppsConfigruationPath')]",
+                        "dependsOn": [
+                          "cluster-config"
+                        ],
                         "timeoutInSeconds": 600,
                         "syncIntervalInSeconds": 120,
                         "retryIntervalInSeconds": 300,
@@ -338,8 +353,9 @@ spec:
         variables:
         - fromFieldPath: spec.parameters.aksId
         - fromFieldPath: spec.parameters.clusterConfigurationUri
-        - fromFieldPath: spec.parameters.clusterConfigruationPath
+        - fromFieldPath: spec.parameters.clusterCommonConfigruationPath
+        - fromFieldPath: spec.parameters.clusterAppsConfigruationPath
         strategy: string
         string:
-          fmt: ${jsonencode({ "aksId" = { value = "%s" }, "clusterConfigurationUri" = { value = "%s" }, "clusterConfigruationPath" ={ value = "%s" }})}
+          fmt: ${jsonencode({ "aksId" = { value = "%s" }, "clusterConfigurationUri" = { value = "%s" }, "clusterCommonConfigruationPath" = { value = "%s" }, "clusterAppsConfigruationPath" ={ value = "%s" }})}
       toFieldPath: spec.forProvider.parametersContent

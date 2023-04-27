@@ -38,13 +38,16 @@ spec:
                     type: string
                   clusterConfigurationUri:
                     type: string
-                  clusterConfigruationPath:
+                  clusterCommonConfigruationPath:
+                    type: string
+                  clusterAppsConfigruationPath:
                     type: string
                 required:
                 - nodeCount
                 - name
                 - location
                 - clusterConfigurationUri
-                - clusterConfigruationPath
+                - clusterCommonConfigruationPath
+                - clusterAppsConfigruationPath
             required:
             - parameters
