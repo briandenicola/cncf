@@ -17,7 +17,7 @@ metadata:
 apiVersion: secrets-store.csi.x-k8s.io/v1
 kind: SecretProviderClass
 metadata:
-  name: postgre-user-secrets-provider
+  name: postgres-user-secrets-provider
   namespace: {{ .Values.NAMESPACE }}
 spec:
   provider: azure
@@ -84,6 +84,10 @@ spec:
             requests:
               memory: "512Mi"
               cpu: "2"
+          volumeMounts:
+          - name:  secrets-store
+            mountPath: "/mnt/secrets-store"
+            readOnly: true
           env:
           - name: POSTGRES_USER
             valueFrom:
@@ -99,6 +103,13 @@ spec:
             value: {{ .Values.POSTGRES_SERVICE_HOST }}
           - name: POSTGRES_SERVICE_PORT
             value: "5432"
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "postgres-user-secrets-provider"
 ---
 apiVersion: v1
 kind: Service
