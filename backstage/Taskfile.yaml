@@ -19,6 +19,22 @@ tasks:
       AKS: 
         sh: terraform -chdir=./infrastructure output -raw AKS_CLUSTER_NAME
 
+  deploy:
+      desc: Deploys Backstage via Helm
+      cmds:
+      - helm upgrade -i backstage --set APP_NAME={{.APP_NAME}} --set ARM_WORKLOAD_APP_ID={{.ARM_WORKLOAD_APP_ID}} --set ARM_TENANT_ID={{.ARM_TENANT_ID}} --set KEYVAULT_NAME={{.KEYVAULT_NAME}} --set POSTGRES_SERVICE_HOST={{.POSTGRES_SERVICE_HOST}} ./chart
+      vars:
+        APP_NAME:
+          sh: terraform -chdir=./infrastructure output -raw APP_NAME
+        ARM_WORKLOAD_APP_ID:
+          sh: terraform -chdir=./infrastructure output -raw ARM_WORKLOAD_APP_ID
+        ARM_TENANT_ID:
+          sh: terraform -chdir=./infrastructure output -raw ARM_TENANT_ID
+        KEYVAULT_NAME:
+          sh: terraform -chdir=./infrastructure output -raw KEYVAULT_NAME
+        POSTGRES_SERVICE_HOST:
+          sh: terraform -chdir=./infrastructure output -raw POSTGRES_SERVICE_HOST
+
   down:
     desc: Destorys Azure infrastructure and cleans up terraform state files
     cmds:

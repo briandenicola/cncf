@@ -27,3 +27,8 @@ output "KEYVAULT_NAME" {
     value = azurerm_key_vault.this.name
     sensitive = false
 }
+
+output "POSTGRES_SERVICE_HOST" {
+    value = azurerm_postgresql_flexible_server.this.fqdn
+    sensitive = false
+}
