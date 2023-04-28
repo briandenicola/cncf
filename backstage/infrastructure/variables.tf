@@ -1,7 +1,7 @@
 variable "namespace" {
   description   = "The namespace for the workload"
   type          = string
-  default       = "default"
+  default       = "backstage"
 }
 
 variable "azure_rbac_group_object_id" {
