@@ -11,6 +11,7 @@ resource "azurerm_postgresql_flexible_server" "this" {
   version                = "12"
   administrator_login    = var.postgresql_user_name
   administrator_password = random_password.postgresql_user_password.result
+  private_dns_zone_id    = azurerm_private_dns_zone.privatelink_postgres_database_azure_com.id
   storage_mb             = 32768
   sku_name               = "GP_Standard_D2ds_v4"
 }
