@@ -64,7 +64,7 @@ spec:
       serviceAccountName: {{ print .Values.APP_NAME "-backstage-identity" }}
       containers:
         - name: backstage
-          image: backstage:1.0.0
+          image: bjd145/backstage:1.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
