@@ -29,9 +29,9 @@ template: {
 	}
 	outputs: {}
 	parameter: {
-		name:         *"aks01" | string
-		nodeCount: 	  *2 | int
-		location:     *"southcentralus" | string
+		name:		*"aks01" | string
+		nodeCount:	*2 | int
+		location:	*"southcentralus" | string
 	}
 }
 
