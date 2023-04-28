@@ -8,6 +8,7 @@ tasks:
     - terraform -chdir=./infrastructure apply -auto-approve
     - task: creds
     - task: deploy
+    - task: port-forward
 
   creds:
     desc: Gets credential file for newly created AKS cluster
@@ -21,20 +22,25 @@ tasks:
         sh: terraform -chdir=./infrastructure output -raw AKS_CLUSTER_NAME
 
   deploy:
-      desc: Deploys Backstage via Helm
-      cmds:
-      - helm upgrade -i backstage --set APP_NAME={{.APP_NAME}} --set ARM_WORKLOAD_APP_ID={{.ARM_WORKLOAD_APP_ID}} --set ARM_TENANT_ID={{.ARM_TENANT_ID}} --set KEYVAULT_NAME={{.KEYVAULT_NAME}} --set POSTGRES_SERVICE_HOST={{.POSTGRES_SERVICE_HOST}} ./chart
-      vars:
-        APP_NAME:
-          sh: terraform -chdir=./infrastructure output -raw APP_NAME
-        ARM_WORKLOAD_APP_ID:
-          sh: terraform -chdir=./infrastructure output -raw ARM_WORKLOAD_APP_ID
-        ARM_TENANT_ID:
-          sh: terraform -chdir=./infrastructure output -raw ARM_TENANT_ID
-        KEYVAULT_NAME:
-          sh: terraform -chdir=./infrastructure output -raw KEYVAULT_NAME
-        POSTGRES_SERVICE_HOST:
-          sh: terraform -chdir=./infrastructure output -raw POSTGRES_SERVICE_HOST
+    desc: Deploys Backstage via Helm
+    cmds:
+    - helm upgrade -i backstage --set APP_NAME={{.APP_NAME}} --set ARM_WORKLOAD_APP_ID={{.ARM_WORKLOAD_APP_ID}} --set ARM_TENANT_ID={{.ARM_TENANT_ID}} --set KEYVAULT_NAME={{.KEYVAULT_NAME}} --set POSTGRES_SERVICE_HOST={{.POSTGRES_SERVICE_HOST}} ./chart
+    vars:
+      APP_NAME:
+        sh: terraform -chdir=./infrastructure output -raw APP_NAME
+      ARM_WORKLOAD_APP_ID:
+        sh: terraform -chdir=./infrastructure output -raw ARM_WORKLOAD_APP_ID
+      ARM_TENANT_ID:
+        sh: terraform -chdir=./infrastructure output -raw ARM_TENANT_ID
+      KEYVAULT_NAME:
+        sh: terraform -chdir=./infrastructure output -raw KEYVAULT_NAME
+      POSTGRES_SERVICE_HOST:
+        sh: terraform -chdir=./infrastructure output -raw POSTGRES_SERVICE_HOST
+  
+  port-forward:
+    desc: Exposes port 7007 on localhost to access site
+    cmds:
+    - kubectl port-forward -n backstage service/backstage 7007:80
 
   down:
     desc: Destorys Azure infrastructure and cleans up terraform state files
