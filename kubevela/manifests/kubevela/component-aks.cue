@@ -20,9 +20,9 @@ template: {
 			}
 			id: context.name
 			parameters: {
-				location: parameter.location
-				nodeCount:     parameter.nodeCount
-				name: 	  parameter.name
+				location:	parameter.location
+				nodeCount:	parameter.nodeCount
+				name:		parameter.name
 			}
 			writeConnectionSecretToRef: name: context.name
 		}
