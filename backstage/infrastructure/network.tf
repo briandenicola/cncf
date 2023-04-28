@@ -59,7 +59,6 @@ resource "azurerm_subnet" "sql" {
   }
 }
 
-
 resource "azurerm_network_security_group" "this" {
   name                = "${local.resource_name}-nsg"
   location            = azurerm_resource_group.this.location
@@ -73,7 +72,7 @@ resource "azurerm_network_security_group" "this" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "80"
-    source_address_prefix      = "${chomp(data.http.myip.response_body)}/32"
+    source_address_prefix      = "${chomp(data.http.myip.response_body)}"
     destination_address_prefix = "*"
   }
 }
@@ -85,5 +84,10 @@ resource "azurerm_subnet_network_security_group_association" "nodes" {
 
 resource "azurerm_subnet_network_security_group_association" "pods" {
   subnet_id                 = azurerm_subnet.api-server.id
+  network_security_group_id = azurerm_network_security_group.this.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "pods" {
+  subnet_id                 = azurerm_subnet.sql.id
   network_security_group_id = azurerm_network_security_group.this.id
 }
