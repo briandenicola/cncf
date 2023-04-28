@@ -10,6 +10,6 @@ spec:
     location: southcentralus
     name: bjdaks05
     nodeCount: 2
-    clusterConfigurationUri: https://github.com/briandenicola/cncf/
-    clusterCommonConfigruationPath: crossplane/infrastructure/cluster-config/common
-    clusterAppsConfigruationPath: crossplane/infrastructure/cluster-config/workload
+    clusterConfigurationUri: https://github.com/briandenicola/cncf
+    clusterCommonConfigruationPath: ./crossplane/cluster-configs/common
+    clusterAppsConfigruationPath: ./crossplane/cluster-configs/workload
