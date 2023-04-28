@@ -4,63 +4,60 @@ kind: Namespace
 metadata:
   name: apps
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: core.oam.dev/v1beta1
+kind: Application
 metadata:
   name: httpbin
   namespace: apps
 spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: httpbin
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
-  minReadySeconds: 5
-  template:
-    metadata:
-      labels:
-        app: httpbin
-    spec: 
-      containers:
-      - name: httpbin
+  components:
+    - name: httpbin
+      type: webservice
+      properties:
         image: bjd145/httpbin:1087
-        imagePullPolicy: Always
-        securityContext:
-          allowPrivilegeEscalation: false  
-          runAsUser: 1000       
-          runAsNonRoot: true
-          readOnlyRootFilesystem: true
+        memory: 1024Mi
+        cpu: "1.0"
+        exposeType: LoadBalancer
         ports:
-        - containerPort: 8080
-        resources:
-          limits:
-            memory: "512Mi"
-            cpu: "2"
-          requests:
-            memory: "64Mi"
-            cpu: "0.25"
+        - port: 8080
+          expose: true
         volumeMounts:
-        - mountPath: /usr/tmp
-          name: tmp-volume
-      volumes:
-      - name: tmp-volume
-        emptyDir: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: httpbinsvc
-  namespace: apps
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
-spec:
-  selector:
-    app: httpbin
-  ports:
-  - port: 80
-    targetPort: 8080
-  type: LoadBalancer
+          emptyDir:
+          - name: tmp-volume
+            mountPath: /usr/tmp
+      traits:
+        - type: annotations
+          properties:
+            prometheus.io/path: /metrics
+            prometheus.io/port: "9090"
+            prometheus.io/scrape: "true"
+        - type: scaler
+          properties:
+            replicas: 2
+        - type: expose
+          properties:
+            anotations:
+              service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+            type: LoadBalancer
+        - type: hpa
+          properties:
+            targetAPIVersion: apps/v1
+            targetKind: Deployment
+            max: 5
+            min: 1
+            cpu:
+              type: Utilization
+              value: 80
+            mem:
+              type: Utilization
+              value: 80
+  policies:
+    - name: target-default
+      type: topology
+      properties:
+        clusters: ["local"]
+        namespace: "apps"
+
+
+
+            
