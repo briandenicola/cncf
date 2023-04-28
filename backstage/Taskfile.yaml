@@ -7,6 +7,7 @@ tasks:
     - terraform -chdir=./infrastructure init
     - terraform -chdir=./infrastructure apply -auto-approve
     - task: creds
+    - task: deploy
 
   creds:
     desc: Gets credential file for newly created AKS cluster
