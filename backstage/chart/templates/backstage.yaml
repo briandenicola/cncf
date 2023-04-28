@@ -99,9 +99,9 @@ spec:
               secretKeyRef:
                 name: postgres-secrets 
                 key: postgres-password
-          - name: POSTGRES_SERVICE_HOST
+          - name: POSTGRES_HOST
             value: {{ .Values.POSTGRES_SERVICE_HOST }}
-          - name: POSTGRES_SERVICE_PORT
+          - name: POSTGRES_PORT
             value: "5432"
       volumes:
       - name: secrets-store
@@ -124,4 +124,4 @@ spec:
     - name: http
       port: 80
       targetPort: 7007
-      
+    
