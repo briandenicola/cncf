@@ -1,0 +1,24 @@
+apiVersion: identities.bjdazure.tech/v1alpha1
+kind: ManagedIdentity
+metadata:
+  namespace: default
+  name: bjdid05
+spec:
+  compositionRef:
+    name: xmanagedidentity-dev
+  parameters:
+    location: southcentralus
+    name: bjdid05
+---
+apiVersion: identities.bjdazure.tech/v1alpha1
+kind: ManagedIdentity
+metadata:
+  namespace: default
+  name: bjdid01
+spec:
+  compositionRef:
+    name: xmanagedidentity-dev
+  parameters:
+    location: southcentralus
+    name: bjdid01
+---
