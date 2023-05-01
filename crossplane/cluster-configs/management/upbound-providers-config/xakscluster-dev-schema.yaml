@@ -34,8 +34,6 @@ spec:
                     enum:
                     - southcentralus
                     - northcentralus
-                  aksId:
-                    type: string
                   clusterConfigurationUri:
                     type: string
                   clusterCommonConfigruationPath:
@@ -51,3 +49,9 @@ spec:
                 - clusterAppsConfigruationPath
             required:
             - parameters
+          status:
+            type: object
+            properties:
+              aksId:
+                description: The AKS Resource Id
+                type: string

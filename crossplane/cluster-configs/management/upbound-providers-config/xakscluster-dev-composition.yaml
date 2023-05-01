@@ -188,7 +188,7 @@ spec:
     patches:
     - type: ToCompositeFieldPath
       fromFieldPath: status.atProvider.id
-      toFieldPath: spec.parameters.aksId
+      toFieldPath: status.aksId
     - type: FromCompositeFieldPath
       fromFieldPath: spec.parameters.name
       toFieldPath: spec.writeConnectionSecretToRef.name
@@ -351,7 +351,7 @@ spec:
     - type: CombineFromComposite
       combine:
         variables:
-        - fromFieldPath: spec.parameters.aksId
+        - fromFieldPath: status.aksId
         - fromFieldPath: spec.parameters.clusterConfigurationUri
         - fromFieldPath: spec.parameters.clusterCommonConfigruationPath
         - fromFieldPath: spec.parameters.clusterAppsConfigruationPath
