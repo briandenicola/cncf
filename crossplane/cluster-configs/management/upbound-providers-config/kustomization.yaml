@@ -4,3 +4,4 @@ resources:
   - azure-provider-config.yaml
   - xakscluster-dev-schema.yaml
   - xakscluster-dev-composition.yaml
+  - claims.yaml
