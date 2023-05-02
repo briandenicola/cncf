@@ -13,6 +13,6 @@ tasks:
     - task: infra:up 
 
   status:
-    desc: Displays current environment status
+    desc: Displays current Kubevela status
     cmds:
-    - task: echo TBD
+    - task: vela system info
