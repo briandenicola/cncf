@@ -27,6 +27,8 @@ spec:
                 properties:
                   name:
                     type: string
+                  rgName:
+                    type: string
                   location:
                     type: string
                     enum:
@@ -34,6 +36,7 @@ spec:
                     - northcentralus
                 required:
                 - name
+                - rgName
                 - location
             required:
             - parameters

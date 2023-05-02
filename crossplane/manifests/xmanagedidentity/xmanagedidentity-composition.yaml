@@ -11,27 +11,6 @@ spec:
     apiVersion: identities.bjdazure.tech/v1alpha1
     kind: XManagedIdentity
   resources:
-  - name: azure-resource-group
-    base:
-      apiVersion: azure.upbound.io/v1beta1
-      kind: ResourceGroup
-      metadata:
-        annotations:
-          meta.upbound.io/api-id: upbound/v1beta1
-        labels:
-          meta.upbound.io/rg-name: crossplane-demo-rg
-          meta.upbound.io/type: azure-resource-group
-      spec:
-        providerConfigRef:
-          name: azure
-    patches:
-    - fromFieldPath: spec.parameters.location
-      toFieldPath: spec.forProvider.location
-      transforms:
-        - type: map
-          map:
-            southcentralus: South Central US
-            northcentralus: North Central US
   - name: azure-managedidentity
     base:
       apiVersion: managedidentity.azure.upbound.io/v1beta1
@@ -46,12 +25,10 @@ spec:
         providerConfigRef:
           name: azure
         forProvider:
-          resourceGroupNameSelector:
-            matchControllerRef: true 
-            matchLabels:
-              meta.upbound.io/rg-name: crossplane-demo-rg
-              meta.upbound.io/type: azure-resource-group
+          description: An azure user assigned managed identity
     patches:
+    - fromFieldPath: spec.parameters.rgName
+      toFieldPath: spec.forProvider.resourceGroupName
     - fromFieldPath: spec.parameters.location
       toFieldPath: spec.forProvider.location
       transforms:
