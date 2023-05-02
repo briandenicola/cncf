@@ -62,6 +62,7 @@ spec:
           name: azure
         forProvider:
           virtualNetworkNameSelector:
+            matchControllerRef: true
             matchLabels:
               meta.upbound.io/vnet-name: crossplane-vnet
               meta.upbound.io/type: azure-virtual-network
@@ -75,6 +76,72 @@ spec:
         strategy: string
         string:
           fmt: "10.%d.1.0/24"
+      toFieldPath: spec.forProvider.addressPrefixes[0]
+      policy:
+        fromFieldPath: Required
+  - name: azure-subnet-nodes
+    base:
+      apiVersion: network.azure.upbound.io/v1beta1
+      kind: Subnet
+      metadata:
+        name: nodes
+        labels:
+          meta.upbound.io/type: azure-virtual-subnet
+          meta.upbound.io/subnet-for: nodes
+      spec:
+        providerConfigRef:
+          name: azure
+        forProvider:
+          virtualNetworkNameSelector:
+            matchControllerRef: true
+            matchLabels:
+              meta.upbound.io/vnet-name: crossplane-vnet
+              meta.upbound.io/type: azure-virtual-network
+    patches:
+    - fromFieldPath: spec.parameters.rgName
+      toFieldPath: spec.forProvider.resourceGroupName
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.parameters.networkCidr
+        strategy: string
+        string:
+          fmt: "10.%d.2.0/24"
+      toFieldPath: spec.forProvider.addressPrefixes[0]
+      policy:
+        fromFieldPath: Required
+  - name: azure-subnet-api-server
+    base:
+      apiVersion: network.azure.upbound.io/v1beta1
+      kind: Subnet
+      metadata:
+        name: api-server
+        labels:
+          meta.upbound.io/type: azure-virtual-subnet
+          meta.upbound.io/subnet-for: api-server
+      spec:
+        providerConfigRef:
+          name: azure
+        forProvider:
+          delegation:
+          - name: api-server-vnet-injection
+            serviceDelegation:
+            - name: Microsoft.ContainerService/managedClusters
+          virtualNetworkNameSelector:
+            matchControllerRef: true
+            matchLabels:
+              meta.upbound.io/vnet-name: crossplane-vnet
+              meta.upbound.io/type: azure-virtual-network
+    patches:
+    - fromFieldPath: spec.parameters.rgName
+      toFieldPath: spec.forProvider.resourceGroupName
+    - type: CombineFromComposite
+      combine:
+        variables:
+        - fromFieldPath: spec.parameters.networkCidr
+        strategy: string
+        string:
+          fmt: "10.%d.3.0/24"
       toFieldPath: spec.forProvider.addressPrefixes[0]
       policy:
         fromFieldPath: Required
