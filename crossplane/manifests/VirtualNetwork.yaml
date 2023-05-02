@@ -1,0 +1,22 @@
+apiVersion: azure.upbound.io/v1beta1
+kind: ResourceGroup
+metadata:
+  name: test-vnet-rg
+spec:
+  providerConfigRef:
+    name: azure
+  forProvider:
+    location: SouthCentral US
+---
+apiVersion: networking.bjdazure.tech/v1alpha1
+kind: VirtualNetwork
+metadata:
+  namespace: default
+  name: bjdvnet01
+spec:
+  compositionRef:
+    name: xvirtrualnetwork-dev
+  parameters:
+    location: southcentralus
+    rgName: test-vnet-rg
+    networkCidr: 190
