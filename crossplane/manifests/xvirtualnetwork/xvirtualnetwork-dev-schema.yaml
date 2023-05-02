@@ -2,15 +2,15 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: xvirtrualnetworks.networking.bjdazure.tech
+  name: xvirtualnetworks.networking.bjdazure.tech
 spec:
   group: networking.bjdazure.tech
   names:
     kind: XVirtualNetwork
-    plural: xvirtrualnetworks
+    plural: xvirtualnetworks
   claimNames:
     kind: VirtualNetwork
-    plural: virtrualnetworks
+    plural: virtualnetworks
   versions:
   - name: v1alpha1
     served: true

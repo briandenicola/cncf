@@ -15,7 +15,7 @@ metadata:
   name: bjdvnet01
 spec:
   compositionRef:
-    name: xvirtrualnetwork-dev
+    name: xvirtualnetwork-dev
   parameters:
     location: southcentralus
     rgName: test-vnet-rg

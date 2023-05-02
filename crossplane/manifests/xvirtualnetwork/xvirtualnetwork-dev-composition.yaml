@@ -1,9 +1,9 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: xvirtrualnetwork-dev
+  name: xvirtualnetwork-dev
   labels:
-    crossplane.io/xrd: xvirtrualnetworks.networking.bjdazure.tech
+    crossplane.io/xrd: xvirtualnetworks.networking.bjdazure.tech
     provider: azure
 spec:
   writeConnectionSecretsToNamespace: upbound-system
