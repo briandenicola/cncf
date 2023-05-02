@@ -1,0 +1,21 @@
+apiVersion: azure.upbound.io/v1beta1
+kind: ResourceGroup
+metadata:
+  name: test-pubsub-rg
+spec:
+  providerConfigRef:
+    name: azure
+  forProvider:
+    location: SouthCentral US
+---
+apiVersion: pubsub.bjdazure.tech/v1alpha1
+kind: EventHub
+metadata:
+  namespace: default
+  name: bjdhub005
+spec:
+  compositionRef:
+    name: xeventhub-dev
+  parameters:
+    location: southcentralus
+    rgName: test-pubsub-rg
