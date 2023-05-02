@@ -61,3 +61,6 @@ spec:
             northcentralus: North Central US
     - fromFieldPath: spec.parameters.name
       toFieldPath: spec.forProvider.name
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.id
+      toFieldPath: status.managedIdentityid

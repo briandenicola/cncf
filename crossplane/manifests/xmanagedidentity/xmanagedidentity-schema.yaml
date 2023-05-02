@@ -37,3 +37,9 @@ spec:
                 - location
             required:
             - parameters
+          status:
+            type: object
+            properties:
+              managedIdentityid:
+                description: The Managed Identity Resource Id
+                type: string
