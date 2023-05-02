@@ -22,7 +22,6 @@ spec:
           meta.upbound.io/rg-name: crossplane-demo-rg
           meta.upbound.io/vnet-name: crossplane-vnet
           meta.upbound.io/type: azure-virtual-network
-        name: crossplane-vnet
       spec:
         providerConfigRef:
           name: azure
@@ -53,7 +52,6 @@ spec:
       apiVersion: network.azure.upbound.io/v1beta1
       kind: Subnet
       metadata:
-        name: private-endpoints
         labels:
           meta.upbound.io/type: azure-virtual-subnet
           meta.upbound.io/subnet-for: private-endpoints
@@ -84,7 +82,6 @@ spec:
       apiVersion: network.azure.upbound.io/v1beta1
       kind: Subnet
       metadata:
-        name: nodes
         labels:
           meta.upbound.io/type: azure-virtual-subnet
           meta.upbound.io/subnet-for: nodes
@@ -115,7 +112,6 @@ spec:
       apiVersion: network.azure.upbound.io/v1beta1
       kind: Subnet
       metadata:
-        name: api-server
         labels:
           meta.upbound.io/type: azure-virtual-subnet
           meta.upbound.io/subnet-for: api-server

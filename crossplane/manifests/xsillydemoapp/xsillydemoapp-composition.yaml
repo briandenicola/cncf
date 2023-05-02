@@ -1,0 +1,41 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xsillydemoapp-dev
+  labels:
+    crossplane.io/xrd: xsillydemoapps.apps.bjdazure.tech
+    provider: azure
+spec:
+  writeConnectionSecretsToNamespace: upbound-system
+  compositeTypeRef:
+    apiVersion: apps.bjdazure.tech/v1alpha1
+    kind: XSillyDemoApp
+  resources:
+  - name: azure-managed-identity
+    base:
+      apiVersion: identities.bjdazure.tech/v1alpha1
+      kind: XManagedIdentity
+      spec:
+        compositionRef:
+          name: xmanagedidentity-dev
+    patches:
+    - fromFieldPath: spec.parameters.rgName
+      toFieldPath: spec.parameters.rgName
+    - fromFieldPath: spec.parameters.location
+      toFieldPath: spec.parameters.location
+    - fromFieldPath: spec.parameters.name
+      toFieldPath: spec.parameters.name
+  - name: azure-virtual-network
+    base:
+      apiVersion: networking.bjdazure.tech/v1alpha1
+      kind: XVirtualNetwork
+      spec:
+        compositionRef:
+          name: xvirtualnetwork-dev
+    patches:
+    - fromFieldPath: spec.parameters.rgName
+      toFieldPath: spec.parameters.rgName
+    - fromFieldPath: spec.parameters.networkCidr
+      toFieldPath: spec.parameters.networkCidr
+    - fromFieldPath: spec.parameters.location
+      toFieldPath: spec.parameters.location

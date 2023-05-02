@@ -1,0 +1,45 @@
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xsillydemoapps.apps.bjdazure.tech
+spec:
+  group: apps.bjdazure.tech
+  names:
+    kind: XSillyDemoApp
+    plural: xsillydemoapps
+  claimNames:
+    kind: SillyDemoApp
+    plural: sillydemoapps
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              parameters:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  rgName:
+                    type: string
+                  networkCidr:
+                    type: integer
+                  location:
+                    type: string
+                    enum:
+                    - southcentralus
+                    - northcentralus
+                required:
+                - name
+                - rgName
+                - location
+                - networkCidr
+            required:
+            - parameters
