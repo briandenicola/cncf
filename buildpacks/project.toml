@@ -1,0 +1,17 @@
+[ _ ]
+schema-version = "0.2"
+
+[[ io.buildpacks.build.env ]]
+  name = 'BP_DOTNET_FRAMEWORK_VERSION'
+  value = '7.0.7'
+
+[[ io.buildpacks.build.env ]]
+  name = 'BP_DOTNET_PUBLISH_FLAGS'
+  value = '--self-contained=true  --nologo'
+
+[[ io.buildpacks.build.env ]]
+  name = 'BP_DEBUG_ENABLED'
+  value = 'false'
+
+#[[io.buildpacks.group]]
+#  uri = "paketo-buildpacks/dotnet-core"

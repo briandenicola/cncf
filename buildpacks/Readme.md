@@ -1,20 +1,28 @@
-⚠️In Progress ⚠️
 # Overview
 
-This repository is a demonstration of CLoud Native Build Packs as a replacement for Dockerfile
+This repository is a demonstration of CLoud Native Build Packs as a replacement for Dockerfile.  Buildpack still require docker or podman to create the OCI compliant container image  
  
 * [Cloud Native Buildpacks](https://buildpacks.io) are an alternative to Dockerfile for building OCI-compliant containers.
-    * One major advantage of Buildpacks over Dockerfile is that you can patch one layer without invalidating all other layers. So you can patch an OS bug without requiring a recompile of the app
+    * One major advantage of Buildpacks over Dockerfile is that you can patch one layer without invalidating all other layers. This allows an OS bug to be patched without requiring a recompile of the entire app
 * [paketo](https://paketo.io/docs/) provides production-ready buildpacks for the most popular languages and frameworks.
 * [Bill of Materials](https://paketo.io/docs/concepts/sbom/)
+* [Podman](https://podman.io/) - A daemonless drop-in replacement for docker
 
 # Install Cli
 * [pack](https://github.com/briandenicola/tooling/blob/main/pack.sh) cli 
 
 # Quicksteps
+> **Note** --builder can be set as default with `pack config default-builder`. <br/>
+> **Note** --buildpack can also be specified in project.toml.
+
 ```bash
-pack config default-builder paketobuildpacks/builder:base
-pack build bjdcsa.azurecr.io/dotnet-sample:v1.0 --path ./src --buildpack paketo-buildpacks/dotnet-core --env BP_DOTNET_PUBLISH_FLAGS="--self-contained=true  --nologo"
+pack build bjdcsa.azurecr.io/dotnet-sample:v1.0 \
+  --path ./src \
+  --builder paketobuildpacks/builder:base \ 
+  --buildpack paketo-buildpacks/dotnet-core \ 
+  --sbom-output-dir ./sbom \
+  --descriptor ./project.toml
+
 docker run -d -p 8080:8080 -e PORT=8080 bjdcsa.azurecr.io/dotnet-sample:v1.0
 curl http://localhost:8080/weatherforecast -vvv
 ```
@@ -58,7 +66,11 @@ Processes:
 
 # Links
 * https://buildpacks.io/docs/concepts/
+* https://buildpacks.io/docs/app-developer-guide/specify-buildpacks/
+* https://buildpacks.io/docs/concepts/components/lifecycle/
+* https://buildpacks.io/docs/app-developer-guide/building-on-podman/
+* https://paketo.io/docs/howto/configuration/#bindings
+* https://paketo.io/docs/howto/app-monitor/#example-with-a-binding
 * https://technology.doximity.com/articles/buildpacks-vs-dockerfiles
 * https://buildpacks.io/docs/buildpack-author-guide/create-buildpack/
 * https://www.youtube.com/watch?v=ofH9_sE2qy0
-* https://buildpacks.io/docs/concepts/components/lifecycle/
