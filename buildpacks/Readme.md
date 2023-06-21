@@ -12,8 +12,7 @@ This repository is a demonstration of CLoud Native Build Packs as a replacement 
 * [pack](https://github.com/briandenicola/tooling/blob/main/pack.sh) cli 
 
 # Quicksteps
-> **Note** --builder can be set as default with `pack config default-builder`. <br/>
-> **Note** --buildpack can also be specified in project.toml.
+> **Note** -- builder can be set as default with `pack config default-builder` and buildpack can also be specified in `project.toml`.
 
 ```bash
 pack build bjdcsa.azurecr.io/dotnet-sample:v1.0 \
