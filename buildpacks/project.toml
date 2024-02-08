@@ -3,7 +3,11 @@ schema-version = "0.2"
 
 [[ io.buildpacks.build.env ]]
   name = 'BP_DOTNET_FRAMEWORK_VERSION'
-  value = '7.0.7'
+  value = '8.0.1'
+
+[[ io.buildpacks.build.env ]]
+  name = 'BP_DOTNET_PROJECT_PATH'
+  value = './src'
 
 [[ io.buildpacks.build.env ]]
   name = 'BP_DOTNET_PUBLISH_FLAGS'

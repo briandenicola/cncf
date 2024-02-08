@@ -17,13 +17,14 @@ This repository is a demonstration of CLoud Native Build Packs as a replacement 
 ```bash
 pack build bjdcsa.azurecr.io/dotnet-sample:v1.0 \
   --path ./src \
-  --builder paketobuildpacks/builder:base \ 
+  --builder paketobuildpacks/builder-jammy-base \
   --buildpack paketo-buildpacks/dotnet-core \ 
   --sbom-output-dir ./sbom \
   --descriptor ./project.toml
 
-docker run -d -p 8080:8080 -e PORT=8080 bjdcsa.azurecr.io/dotnet-sample:v1.0
-curl http://localhost:8080/weatherforecast -vvv
+docker run -d -p 8081:5501 bjdcsa.azurecr.io/dotnet-sample:v1.0
+curl http://localhost:8081/ -vvv
+__Hello World! The time now is 02/08/2024 20:22:32__
 ```
 
 # Inspect an Image
