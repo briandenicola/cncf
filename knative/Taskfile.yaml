@@ -57,6 +57,7 @@ tasks:
     - kubectl apply -l knative.dev/crd-install=true -f https://github.com/knative/net-istio/releases/download/knative-v{{.KNATIVE_VER}}/istio.yaml
     - kubectl apply -f https://github.com/knative/net-istio/releases/download/knative-v{{.KNATIVE_VER}}/istio.yaml
     - kubectl apply -f https://github.com/knative/net-istio/releases/download/knative-v{{.KNATIVE_VER}}/net-istio.yaml
+    - kubectl apply -f https://github.com/knative/serving/releases/download/knative-v{{.KNATIVE_VER}}/serving-default-domain.yaml
     - task: status
   
   demos:
