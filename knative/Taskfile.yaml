@@ -51,7 +51,9 @@ tasks:
     desc: Deploys Knative 
     cmds:
     - kubectl apply -f https://github.com/knative/serving/releases/download/knative-v{{.KNATIVE_VER}}/serving-crds.yaml
+    - kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v{{.KNATIVE_VER}}/eventing-crds.yaml
     - kubectl apply -f https://github.com/knative/serving/releases/download/knative-v{{.KNATIVE_VER}}/serving-core.yaml
+    - kubectl apply -f https://github.com/knative/eventing/releases/download/knative-v{{.KNATIVE_VER}}/eventing-core.yaml
     - kubectl apply -l knative.dev/crd-install=true -f https://github.com/knative/net-istio/releases/download/knative-v{{.KNATIVE_VER}}/istio.yaml
     - kubectl apply -f https://github.com/knative/net-istio/releases/download/knative-v{{.KNATIVE_VER}}/istio.yaml
     - kubectl apply -f https://github.com/knative/net-istio/releases/download/knative-v{{.KNATIVE_VER}}/net-istio.yaml
@@ -67,6 +69,7 @@ tasks:
     desc: Show current state of the deployment 
     cmds:
     - kubectl -n knative-serving get pods 
+    - kubectl -n knative-eventing get pods
     - kubectl -n knative-demo get configurations.serving.knative.dev
     - kubectl -n knative-demo get revisions.serving.knative.dev
     - kubectl -n knative-demo get routes.serving.knative.dev
