@@ -68,6 +68,8 @@ tasks:
   status:
     desc: Show current state of the deployment 
     cmds:
+    - kubectl get namespace knative-serving -o jsonpath='{.metadata.labels.app\.kubernetes\.io/version}'; echo
+    - kubectl get namespace knative-eventing -o jsonpath='{.metadata.labels.app\.kubernetes\.io/version}'; echo
     - kubectl -n knative-serving get pods 
     - kubectl -n knative-eventing get pods
     - kubectl -n knative-demo get configurations.serving.knative.dev
