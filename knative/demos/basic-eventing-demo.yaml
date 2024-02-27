@@ -14,7 +14,8 @@
 apiVersion: sources.knative.dev/v1
 kind: PingSource
 metadata:
-  name: source
+  name: ping-source
+  namespace: knative-demo
 spec:
   schedule: "* * * * *"
   data: '{"message": "Hello world from ping!"}'
@@ -22,12 +23,13 @@ spec:
     ref:
       apiVersion: serving.knative.dev/v1
       kind: Service
-      name: service
+      name: ping-demo
 ---
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: service
+  name: ping-demo
+  namespace: knative-demo
 spec:
   template:
     spec:
