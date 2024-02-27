@@ -63,7 +63,7 @@ tasks:
   demos:
     desc: Deploys Basic applications
     cmds:
-    - kubectl apply -f ./demos
+    - kubectl apply -k ./demos
     - task: status 
   
   status:
