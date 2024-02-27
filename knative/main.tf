@@ -20,9 +20,9 @@ module "cluster" {
   resource_name        = local.resource_name
   public_key_openssh   = tls_private_key.rsa.public_key_openssh
   tags                 = local.tags
-  kubernetes_version   = "1.27.7"
+  kubernetes_version   = "1.28.5"
   sdlc_environment     = "dev"
-  vm_sku               = "Standard_D16as_v5"
+  vm_sku               = "Standard_D8as_v5"
   node_count           = "3"
 }
 
