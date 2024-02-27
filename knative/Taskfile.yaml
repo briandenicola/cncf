@@ -2,6 +2,7 @@ version: '3'
 
 env:
   KNATIVE_VER: 1.13.1
+  DOCKER_REPO: bjd145
 
 tasks:
   up:
@@ -66,6 +67,14 @@ tasks:
     - kubectl apply -k ./demos
     - task: status 
   
+  func:
+    dir: ./demos/hellowrldfunc
+    desc: Deploys a Knative Func applications
+    cmds:
+    - kn func build --registry docker.io/{{.DOCKER_REPO}}
+    - kn func deploy --registry docker.io/{{.DOCKER_REPO}}
+    - kn func invoke
+
   status:
     desc: Show current state of the deployment 
     cmds:

@@ -1,0 +1,11 @@
+specVersion: 0.35.0
+name: helloworldfunc
+runtime: go
+registry: docker.io/bjd145
+image: docker.io/bjd145/helloworldfunc:latest
+imageDigest: sha256:85be9fd10ec089233cc0e02d81e29af345d490acce0b556e0c4e08a5ba346077
+created: 2024-02-27T14:47:42.549954798-06:00
+build:
+  builder: pack
+deploy:
+  namespace: default
