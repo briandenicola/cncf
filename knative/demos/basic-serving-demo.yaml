@@ -19,8 +19,7 @@ spec:
         autoscaling.knative.dev/max-scale: "5"
     spec:
       containers:
-      #- image: bjd145/httpbin:1087
-      - image: bjd145/whatos:2.0
+      - image: bjd145/whatos:e7fbcf6f2122
         ports:
         - name: http1
           containerPort: 8081
