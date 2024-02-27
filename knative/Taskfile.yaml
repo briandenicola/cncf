@@ -1,0 +1,80 @@
+version: '3'
+
+env:
+  KNATIVE_VER: 1.13.1
+
+tasks:
+  up:
+    desc: Builds end to end an AKS environment
+    cmds:
+    - task: init
+    - task: apply
+    - task: creds
+    vars:
+      REGION: '{{default "southcentralus" .CLI_ARGS}}'
+
+  init: 
+    desc: Initializes Terraform
+    cmds:
+    - terraform workspace new {{.REGION}} || true
+    - terraform workspace select {{.REGION}}
+    - terraform init
+    vars:
+      REGION: '{{default "southcentralus" .CLI_ARGS}}'
+
+  apply: 
+    desc: Applies Terraform configuration
+    cmds:
+    - terraform apply -auto-approve -var "region={{.REGION}}"
+    vars:
+      REGION: '{{default "southcentralus" .CLI_ARGS}}'
+
+  plan:
+    desc: Reviews Terraform plan
+    cmds:
+    - terraform plan -var "region={{.REGION}}"
+    vars:
+      REGION: '{{default "southcentralus" .CLI_ARGS}}'
+    
+  creds:
+    desc: Grab AKS credentials 
+    cmds:
+    - az aks get-credentials --name {{.AKS}} --resource-group {{.RG}}
+    - sed -i s/devicecode/azurecli/g ~/.kube/config
+    vars:
+      RG: 
+        sh: terraform output -raw AKS_RESOURCE_GROUP
+      AKS: 
+        sh: terraform output -raw AKS_CLUSTER_NAME
+
+  knative:
+    desc: Deploys Knative 
+    cmds:
+    - kubectl apply -f https://github.com/knative/serving/releases/download/knative-v{{.KNATIVE_VER}}/serving-crds.yaml
+    - kubectl apply -f https://github.com/knative/serving/releases/download/knative-v{{.KNATIVE_VER}}/serving-core.yaml
+    - kubectl apply -l knative.dev/crd-install=true -f https://github.com/knative/net-istio/releases/download/knative-v{{.KNATIVE_VER}}/istio.yaml
+    - kubectl apply -f https://github.com/knative/net-istio/releases/download/knative-v{{.KNATIVE_VER}}/istio.yaml
+    - kubectl apply -f https://github.com/knative/net-istio/releases/download/knative-v{{.KNATIVE_VER}}/net-istio.yaml
+    - task: status
+  
+  demos:
+    desc: Deploys Basic applications
+    cmds:
+    - kubectl apply -f ./demos
+    - task: status 
+  
+  status:
+    desc: Show current state of the deployment 
+    cmds:
+    - kubectl -n knative-serving get pods 
+    - kubectl -n knative-demo get configurations.serving.knative.dev
+    - kubectl -n knative-demo get revisions.serving.knative.dev
+    - kubectl -n knative-demo get routes.serving.knative.dev
+    - kubectl -n knative-demo get service.serving.knative.dev/autoscale
+    - kubectl -n knative-demo get pods 
+
+  down:
+    desc: Destroys all Azure resources and cleans up Terraform
+    cmds:
+    - az group list --tag Application="Knative Demo" --query "[].name" -o tsv | xargs -ot -n 1 az group delete -y --verbose --no-wait -n  || true
+    - cd ./infrastructure; rm -rf terraform.tfstate.d .terraform.lock.hcl .terraform terraform.tfstate terraform.tfstate.backup .terraform.tfstate.lock.info || true
