@@ -24,13 +24,9 @@ spec:
     spec:
       containers:
       - name: otel-collector
-        #image: otel/opentelemetry-collector:latest
-        #command:
-        #- "/otelcol"
-        #- "--config=/config/otel-collector-config.yaml"
-        image: otel/opentelemetry-collector-contrib-dev:latest #Required for Azure Monitor integration
+        image: otel/opentelemetry-collector-contrib:latest
         command:
-        - "/otelcontribcol"
+        - "/otelcol-contrib"
         - "--config=/config/otel-collector-config.yaml"
         resources:
           limits:
@@ -40,7 +36,8 @@ spec:
             cpu: 200m
             memory: 400Mi
         ports:
-          - containerPort: 9411
+          - containerPort: 4317
+          - containerPort: 13133
         livenessProbe:
           httpGet:
             path: /
@@ -70,9 +67,9 @@ metadata:
     component: otel-collector
 spec:
   ports:
-  - name: zipkin
-    port: 9411
+  - name: grpc
+    port: 4317
     protocol: TCP
-    targetPort: 9411
+    targetPort: 4317
   selector:
     component: otel-collector

@@ -6,44 +6,38 @@ metadata:
 data:
   otel-collector-config.yaml: |
     receivers:
-        zipkin:
-            endpoint: 0.0.0.0:9411
-    extensions:
-        health_check:
-        pprof:
-            endpoint: :1888
-        zpages:
-            endpoint: :55679
-    exporters:
-        #otlp:
-        #   endpoint: "jaeger:4317"
-        #   tls:
-        #       insecure: true
-        
-        logging:
-            loglevel: debug
-        #   prometheus:
-        #       endpoint: "otelcol:9464"
-        #       resource_to_telemetry_conversion:
-        #           enabled: true
-        #       enable_open_metrics: true
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+    processors:
+      batch:
 
-        azuremonitor:
-            endpoint: "https://dc.services.visualstudio.com/v2/track"
-            instrumentation_key: {{ .Values.APP_INSIGHTS_KEY }}
-            maxbatchsize: 100
-            maxbatchinterval: 10s
+    extensions:
+      health_check:
+
+    exporters:
+      debug:
+        verbosity: detailed
+
+      azuremonitor:
+        endpoint: "https://dc.services.visualstudio.com/v2/track"
+        instrumentation_key: {{ .Values.APP_INSIGHTS_KEY }}
+        maxbatchsize: 100
+        maxbatchinterval: 10s
+    
     service:
-        extensions: [pprof, zpages, health_check]
-        pipelines:
-            traces:
-                receivers: [zipkin]
-                exporters: [azuremonitor,logging]
-            metrics:
-                receivers: [otlp]
-                processors: [memory_limiter, batch]
-                exporters: [azuremonitor,logging]
-            logs:
-                receivers: [otlp]
-                processors: [memory_limiter, batch]
-                exporters: [azuremonitor,logging]
+      extensions: [health_check]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [debug,azuremonitor]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [debug,azuremonitor]
+        logs:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [debug,azuremonitor]

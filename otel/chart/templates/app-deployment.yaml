@@ -21,22 +21,26 @@ spec:
     spec:
       containers:
       - name: otel-demo
-        image: {{ print .Values.ACR_NAME ".azurecr.io/otel-demo:" .Values.COMMIT_VERSION }} 
+        image: {{ print .Values.ACR_NAME ".azurecr.io/otel-demo:" .Values.COMMIT_VERSION }}
+        imagePullPolicy: Always
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         resources:
           requests:
-            memory: "64Mi"
-            cpu: "250m"
-          limits:
             memory: "128Mi"
-            cpu: "500m"
+          limits:
+            memory: "512Mi"
+        env:
+        - name: DEMO_OTEL_COLLECTION_ENDPOINT
+          value: {{ .Values.OTEL_COLLECTION_ENDPOINT }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: otel-demo-svc
   namespace: {{ .Values.NAMESPACE }}
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
   labels:
     version: "1.0"
 spec:
@@ -44,5 +48,5 @@ spec:
     app: otel-demo
   ports:
   - port: 80
-    targetPort: 80
+    targetPort: 8080
   type: LoadBalancer 
