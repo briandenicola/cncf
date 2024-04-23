@@ -26,13 +26,13 @@ tasks:
   deploy:
     desc: Deploys code via Helm 
     cmds:
-    - helm upgrade -i oteldemo --set ACR_NAME="{{.ACR_NAME}}" --set COMMIT_VERSION={{.COMMIT_VERSION}} --set APP_INSIGHTS_KEY="{{.APP_INSIGHTS_KEY}}" ./chart
+    - helm upgrade -i oteldemo --set ACR_NAME="{{.ACR_NAME}}" --set COMMIT_VERSION={{.COMMIT_VERSION}} --set APP_INSIGHTS.CONNECTION_STRING="{{.APP_INSIGHTS_CONNECTION_STRING}}" ./chart
     vars:
       ACR_NAME: '{{default "bjdcsa" .CLI_ARGS}}'
       COMMIT_VERSION:
         sh: git rev-parse HEAD | cut -c 1-8
-      APP_INSIGHTS_KEY: 
-        sh: terraform -chdir=./infrastructure output -raw AI_INSTRUMENTATION_KEY
+      APP_INSIGHTS_CONNECTION_STRING: 
+        sh: terraform -chdir=./infrastructure output -raw APP_INSIGHTS_CONNECTION_STRING
 
   creds:
     desc: Grab AKS credentials 
