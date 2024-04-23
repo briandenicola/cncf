@@ -8,7 +8,7 @@ output "AKS_CLUSTER_NAME" {
     sensitive = false
 }
 
-output "AI_INSTRUMENTATION_KEY" {
-    value = azurerm_application_insights.this.instrumentation_key
+output "APP_INSIGHTS_CONNECTION_STRING" {
+    value = azurerm_application_insights.this.connection_string
     sensitive =  true
 }
