@@ -38,6 +38,7 @@ spec:
         ports:
           - containerPort: 4317
           - containerPort: 13133
+          - containerPort: 9411
         livenessProbe:
           httpGet:
             path: /
@@ -71,5 +72,9 @@ spec:
     port: 4317
     protocol: TCP
     targetPort: 4317
+  - name: zipkin
+    port: 9411
+    protocol: TCP
+    targetPort: 9411       
   selector:
     component: otel-collector

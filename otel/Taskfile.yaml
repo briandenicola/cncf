@@ -26,7 +26,7 @@ tasks:
     desc: Deploys code via Helm 
     cmds:
     - helm upgrade -i oteldemo --set REPO_NAME="{{.REPO_NAME}}" --set COMMIT_VERSION={{.COMMIT_VERSION}} --set APP_INSIGHTS.CONNECTION_STRING="{{.APP_INSIGHTS_CONNECTION_STRING}}" ./chart
-    - kubectl rollout restart deploy
+    #- kubectl rollout restart deploy
     vars:
       REPO_NAME: '{{default "bjd145" .CLI_ARGS}}'
       COMMIT_VERSION:
