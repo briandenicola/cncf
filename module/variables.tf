@@ -15,6 +15,11 @@ variable "public_key_openssh" {
   description = "The public key to use for SSH access to the cluster"
 }
 
+variable "zones" {
+  description = "The availability zones to deploy AKS to"
+  default = ["1", "2", "3"]
+}
+
 variable "vm_sku" {
   description = "The value for the VM SKU"
   default     = "Standard_D4ads_v5"

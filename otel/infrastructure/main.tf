@@ -24,6 +24,7 @@ module "cluster" {
   sdlc_environment     = "dev"
   vm_sku               = "Standard_D8as_v5"
   node_count           = "3"
+  zones                = ["1"]
 }
 
 # resource "azurerm_resource_group" "this" {
