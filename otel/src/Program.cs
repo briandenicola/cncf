@@ -64,6 +64,7 @@ otel.WithMetrics(metricProviderBuilder => metricProviderBuilder
 
 var app = builder.Build();
 
+app.MapGet("/nested", SendNested);
 app.MapGet("/hello", () =>
 {
     _logger.LogInformation("Request Received");
@@ -76,3 +77,32 @@ app.MapGet("/hello", () =>
 
 _logger.LogInformation("App Run");
 app.Run();
+
+
+async Task SendNested(int nestlevel, ILogger<Program> logger, HttpContext context, IHttpClientFactory clientFactory)
+{
+   using var activity = activitySource.StartActivity("SayHelloNested");
+
+    if (nestlevel <= 5)
+    {
+        logger.LogInformation("Sending Hello, level {nestlevel}", nestlevel);
+
+        counter.Add(1);
+        activity?.SetTag("nest-level", nestlevel);
+
+        await context.Response.WriteAsync($"Hello from level: {nestlevel}\r\n");
+
+        if (nestlevel > 0)
+        {
+            var request = context.Request;
+            var url = new Uri($"{request.Scheme}://{request.Host}{request.Path}?nestlevel={nestlevel - 1}");
+            var nestedResult = await clientFactory.CreateClient().GetStringAsync(url);
+            await context.Response.WriteAsync(nestedResult);
+        }
+    }
+    else
+    {
+        logger.LogError("Nest level requested {nestlevel} is too high", nestlevel);
+        await context.Response.WriteAsync("Nest level too high, max is 5");
+    }
+}

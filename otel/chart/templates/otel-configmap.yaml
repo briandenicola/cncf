@@ -11,9 +11,6 @@ data:
           grpc:
             endpoint: 0.0.0.0:4317
 
-      zipkin:
-        endpoint: 0.0.0.0:9411
-
     processors:
       batch:
 
@@ -33,7 +30,7 @@ data:
       extensions: [health_check]
       pipelines:
         traces:
-          receivers: [otlp,zipkin]
+          receivers: [otlp]
           processors: [batch]
           exporters: [debug,azuremonitor]
         metrics:
