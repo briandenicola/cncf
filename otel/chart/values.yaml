@@ -1,2 +1,3 @@
 NAMESPACE: 'default'
+REPO_NAME: ''
 OTEL_COLLECTOR_ENDPOINT: 'http://otel-collector.otel-system.svc.cluster.local:4317'

@@ -10,6 +10,7 @@ data:
         protocols:
           grpc:
             endpoint: 0.0.0.0:4317
+
     processors:
       batch:
 
@@ -21,7 +22,7 @@ data:
         verbosity: detailed
 
       azuremonitor:
-        connection_string: {{ .Values.APP_INSIGHTS.CONNECTION_STRING }}
+        connection_string: {{ .Values.APP_INSIGHTS.CONNECTION_STRING | quote }}
         maxbatchsize: 100
         maxbatchinterval: 10s
     

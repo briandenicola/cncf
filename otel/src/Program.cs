@@ -11,24 +11,28 @@ _logger.LogInformation("Starting up");
 var appResourceBuilder = ResourceBuilder.CreateDefault()
     .AddService(serviceName: serviceName, serviceVersion: serviceVersion);
 
+var meter = new Meter(serviceName);
+var counter = meter.CreateCounter<long>("app.request-counter");
+
 var configurationBuilder = new ConfigurationBuilder();
 configurationBuilder.AddEnvironmentVariables(prefix: "DEMO_");
 var config = configurationBuilder.Build();
 
 _logger.LogInformation("Found configuration: {config}", config["OTEL_COLLECTOR_ENDPOINT"]);
+_logger.LogInformation("Found configuration: {config}", config["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpClient();
 
 _logger.LogInformation("Adding OpenTelemetry");
 
 var otel = builder.Services.AddOpenTelemetry();
 
-otel.UseAzureMonitor( o => {  
-    o.ConnectionString = builder.Configuration["APP_INSIGHTS_CONNECTION_STRING"];
-    o.SamplingRatio = 0.1F; 
-});
+// otel.UseAzureMonitor( o =>  
+//     o.ConnectionString = config["APPLICATIONINSIGHTS_CONNECTION_STRING"]
+// );
 
 otel.WithTracing(tracerProviderBuilder => tracerProviderBuilder
     .AddSource(activitySource.Name)
@@ -43,13 +47,13 @@ otel.WithTracing(tracerProviderBuilder => tracerProviderBuilder
     })
 );
 
-var meter = new Meter(serviceName);
-var counter = meter.CreateCounter<long>("app.request-counter");
 otel.WithMetrics(metricProviderBuilder => metricProviderBuilder
     .SetResourceBuilder(appResourceBuilder)
     .AddAspNetCoreInstrumentation()
     .AddHttpClientInstrumentation()
     .AddMeter(meter.Name)
+    .AddMeter("Microsoft.AspNetCore.Hosting")
+    .AddMeter("Microsoft.AspNetCore.Server.Kestrel")    
     .AddConsoleExporter()
     .AddOtlpExporter(opt =>
     {
@@ -62,6 +66,7 @@ var app = builder.Build();
 
 app.MapGet("/hello", () =>
 {
+    _logger.LogInformation("Request Received");
     using var activity = activitySource.StartActivity("SayHello");
     activity?.SetTag("bar", "Hello, World!");
     counter.Add(1);

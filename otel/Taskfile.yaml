@@ -15,20 +15,20 @@ tasks:
   build:
     desc: Builds the code and pushes to Azure Container Register
     cmds:
-    - docker build -t {{.ACR_NAME}}.azurecr.io/otel-demo:{{.COMMIT_VERSION}} src/
-    - az acr login -n {{.ACR_NAME}}
-    - docker push {{.ACR_NAME}}.azurecr.io/otel-demo:{{.COMMIT_VERSION}}
+    - docker build -t {{.REPO_NAME}}/otel-demo:{{.COMMIT_VERSION}} src/    
+    - docker push {{.REPO_NAME}}/otel-demo:{{.COMMIT_VERSION}}
     vars:
-      ACR_NAME: '{{default "bjdcsa" .CLI_ARGS}}'
+      REPO_NAME: '{{default "bjd145" .CLI_ARGS}}'
       COMMIT_VERSION:
         sh: git rev-parse HEAD | cut -c 1-8
 
   deploy:
     desc: Deploys code via Helm 
     cmds:
-    - helm upgrade -i oteldemo --set ACR_NAME="{{.ACR_NAME}}" --set COMMIT_VERSION={{.COMMIT_VERSION}} --set APP_INSIGHTS.CONNECTION_STRING="{{.APP_INSIGHTS_CONNECTION_STRING}}" ./chart
+    - helm upgrade -i oteldemo --set REPO_NAME="{{.REPO_NAME}}" --set COMMIT_VERSION={{.COMMIT_VERSION}} --set APP_INSIGHTS.CONNECTION_STRING="{{.APP_INSIGHTS_CONNECTION_STRING}}" ./chart
+    - kubectl rollout restart deploy
     vars:
-      ACR_NAME: '{{default "bjdcsa" .CLI_ARGS}}'
+      REPO_NAME: '{{default "bjd145" .CLI_ARGS}}'
       COMMIT_VERSION:
         sh: git rev-parse HEAD | cut -c 1-8
       APP_INSIGHTS_CONNECTION_STRING: 

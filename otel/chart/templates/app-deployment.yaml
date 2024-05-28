@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: otel-demo
-        image: {{ print .Values.ACR_NAME ".azurecr.io/otel-demo:" .Values.COMMIT_VERSION }}
+        image: {{ print .Values.REPO_NAME "/otel-demo:" .Values.COMMIT_VERSION }}
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -33,7 +33,7 @@ spec:
         env:
         - name: DEMO_OTEL_COLLECTOR_ENDPOINT
           value: {{ .Values.OTEL_COLLECTOR_ENDPOINT }}
-        - name: DEMO_APP_INSIGHTS_CONNECTION_STRING
+        - name: DEMO_APPLICATIONINSIGHTS_CONNECTION_STRING 
           value: {{ .Values.APP_INSIGHTS.CONNECTION_STRING }}          
 ---
 apiVersion: v1
