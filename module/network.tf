@@ -42,14 +42,26 @@ resource "azurerm_subnet" "compute" {
   resource_group_name                           = azurerm_resource_group.this.name
   virtual_network_name                          = azurerm_virtual_network.this.name
   address_prefixes                              = [local.compute_subnet_cidir]
-  private_endpoint_network_policies_enabled     = false
+  private_endpoint_network_policies             = "Enabled"
   private_link_service_network_policies_enabled = false
 }
 
 resource "azurerm_network_security_group" "this" {
-  name                = "${var.resource_name}-default-nsg"
+  name                = local.default_nsg_name
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
+
+  security_rule {
+    name                       = "AllowHTTPInbound"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "nodes" {

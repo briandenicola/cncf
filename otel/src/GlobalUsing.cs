@@ -6,3 +6,4 @@ global using System.Diagnostics.Metrics;
 global using System.Diagnostics;
 global using OpenTelemetry.Exporter;
 global using Microsoft.Extensions.Logging;
+global using Azure.Monitor.OpenTelemetry.AspNetCore;

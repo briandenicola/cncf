@@ -31,8 +31,10 @@ spec:
           limits:
             memory: "512Mi"
         env:
-        - name: DEMO_OTEL_COLLECTION_ENDPOINT
-          value: {{ .Values.OTEL_COLLECTION_ENDPOINT }}
+        - name: DEMO_OTEL_COLLECTOR_ENDPOINT
+          value: {{ .Values.OTEL_COLLECTOR_ENDPOINT }}
+        - name: DEMO_APP_INSIGHTS_CONNECTION_STRING
+          value: {{ .Values.APP_INSIGHTS.CONNECTION_STRING }}          
 ---
 apiVersion: v1
 kind: Service

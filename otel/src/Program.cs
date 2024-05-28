@@ -15,7 +15,7 @@ var configurationBuilder = new ConfigurationBuilder();
 configurationBuilder.AddEnvironmentVariables(prefix: "DEMO_");
 var config = configurationBuilder.Build();
 
-_logger.LogInformation("Found configuration: {config}", config["otel_collection_endpoint"]);
+_logger.LogInformation("Found configuration: {config}", config["OTEL_COLLECTOR_ENDPOINT"]);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -24,6 +24,12 @@ builder.Services.AddSwaggerGen();
 _logger.LogInformation("Adding OpenTelemetry");
 
 var otel = builder.Services.AddOpenTelemetry();
+
+otel.UseAzureMonitor( o => {  
+    o.ConnectionString = builder.Configuration["APP_INSIGHTS_CONNECTION_STRING"];
+    o.SamplingRatio = 0.1F; 
+});
+
 otel.WithTracing(tracerProviderBuilder => tracerProviderBuilder
     .AddSource(activitySource.Name)
     .SetResourceBuilder(appResourceBuilder)
@@ -33,7 +39,7 @@ otel.WithTracing(tracerProviderBuilder => tracerProviderBuilder
     .AddOtlpExporter(opt =>
     {
         opt.Protocol = OtlpExportProtocol.Grpc;
-        opt.Endpoint = new Uri(config["otel_collection_endpoint"]);
+        opt.Endpoint = new Uri(config["OTEL_COLLECTOR_ENDPOINT"]);
     })
 );
 
@@ -48,7 +54,7 @@ otel.WithMetrics(metricProviderBuilder => metricProviderBuilder
     .AddOtlpExporter(opt =>
     {
         opt.Protocol = OtlpExportProtocol.Grpc;
-        opt.Endpoint = new Uri( config["otel_collection_endpoint"] );
+        opt.Endpoint = new Uri( config["OTEL_COLLECTOR_ENDPOINT"] );
     })
 );
 
