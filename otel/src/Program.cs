@@ -2,11 +2,26 @@ var serviceName = "bjdazure.otel-demo.hello-service";
 var serviceVersion = "1.0.0";
 var activitySource = new ActivitySource(serviceName);
 
+var configurationBuilder = new ConfigurationBuilder();
+configurationBuilder.AddEnvironmentVariables(prefix: "DEMO_");
+var config = configurationBuilder.Build();
+
 var builder = WebApplication.CreateBuilder(args);
 
-using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+using ILoggerFactory factory = LoggerFactory.Create(builder => builder
+    .AddOpenTelemetry( logging => {
+        logging.IncludeScopes = true;
+        logging.AddConsoleExporter();
+        logging.AddOtlpExporter(opt => {
+            opt.Protocol = OtlpExportProtocol.Grpc;
+            opt.Endpoint = new Uri( config["OTEL_COLLECTOR_ENDPOINT"] );
+        });
+    })
+);
+
 ILogger _logger = factory.CreateLogger("Program");
 _logger.LogInformation("Starting up");
+_logger.LogInformation("Found configuration: {config}", config["OTEL_COLLECTOR_ENDPOINT"]);
 
 var appResourceBuilder = ResourceBuilder.CreateDefault()
     .AddService(serviceName: serviceName, serviceVersion: serviceVersion);
@@ -14,21 +29,12 @@ var appResourceBuilder = ResourceBuilder.CreateDefault()
 var meter = new Meter(serviceName);
 var counter = meter.CreateCounter<long>("app.request-counter");
 
-var configurationBuilder = new ConfigurationBuilder();
-configurationBuilder.AddEnvironmentVariables(prefix: "DEMO_");
-var config = configurationBuilder.Build();
-
-_logger.LogInformation("Found configuration: {config}", config["OTEL_COLLECTOR_ENDPOINT"]);
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 
-_logger.LogInformation("Adding OpenTelemetry");
-
 var otel = builder.Services.AddOpenTelemetry();
-
 // otel.UseAzureMonitor( o =>  
 //     o.ConnectionString = config["APPLICATIONINSIGHTS_CONNECTION_STRING"]
 // );
@@ -77,14 +83,14 @@ app.MapGet("/hello", () =>
 _logger.LogInformation("App Run");
 app.Run();
 
-
-async Task SendNested(int nestlevel, ILogger<Program> logger, HttpContext context, IHttpClientFactory clientFactory)
+async Task SendNested(int nestlevel, HttpContext context, IHttpClientFactory clientFactory)
 {
-   using var activity = activitySource.StartActivity("SayHelloNested");
+    using var scope = _logger.BeginScope("{Id}", Guid.NewGuid().ToString("N"));
+    using var activity = activitySource.StartActivity("SayHelloNested");
 
     if (nestlevel <= 5)
     {
-        logger.LogInformation("Sending Hello, level {nestlevel}", nestlevel);
+        _logger.LogInformation("Sending Hello, level {nestlevel}", nestlevel);
 
         counter.Add(1);
         activity?.SetTag("nest-level", nestlevel);
@@ -101,7 +107,7 @@ async Task SendNested(int nestlevel, ILogger<Program> logger, HttpContext contex
     }
     else
     {
-        logger.LogError("Nest level requested {nestlevel} is too high", nestlevel);
+        _logger.LogError("Nest level requested {nestlevel} is too high", nestlevel);
         await context.Response.WriteAsync("Nest level too high, max is 5");
     }
 }
