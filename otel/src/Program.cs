@@ -19,7 +19,6 @@ configurationBuilder.AddEnvironmentVariables(prefix: "DEMO_");
 var config = configurationBuilder.Build();
 
 _logger.LogInformation("Found configuration: {config}", config["OTEL_COLLECTOR_ENDPOINT"]);
-_logger.LogInformation("Found configuration: {config}", config["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
