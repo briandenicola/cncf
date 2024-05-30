@@ -22,7 +22,7 @@ module "cluster" {
   tags                 = local.tags
   kubernetes_version   = "1.28"
   sdlc_environment     = "dev"
-  vm_sku               = "Standard_D8as_v5"
+  vm_sku               = "Standard_D4d_v5"
   node_count           = "3"
   zones                = ["1"]
 }

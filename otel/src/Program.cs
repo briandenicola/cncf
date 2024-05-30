@@ -9,12 +9,14 @@ var config = configurationBuilder.Build();
 var builder = WebApplication.CreateBuilder(args);
 
 using ILoggerFactory factory = LoggerFactory.Create(builder => builder
-    .AddOpenTelemetry( logging => {
+    .AddOpenTelemetry(logging =>
+    {
         logging.IncludeScopes = true;
         logging.AddConsoleExporter();
-        logging.AddOtlpExporter(opt => {
+        logging.AddOtlpExporter(opt =>
+        {
             opt.Protocol = OtlpExportProtocol.Grpc;
-            opt.Endpoint = new Uri( config["OTEL_COLLECTOR_ENDPOINT"] );
+            opt.Endpoint = new Uri(config["OTEL_COLLECTOR_ENDPOINT"]);
         });
     })
 );
@@ -58,12 +60,12 @@ otel.WithMetrics(metricProviderBuilder => metricProviderBuilder
     .AddHttpClientInstrumentation()
     .AddMeter(meter.Name)
     .AddMeter("Microsoft.AspNetCore.Hosting")
-    .AddMeter("Microsoft.AspNetCore.Server.Kestrel")    
+    .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
     .AddConsoleExporter()
     .AddOtlpExporter(opt =>
     {
         opt.Protocol = OtlpExportProtocol.Grpc;
-        opt.Endpoint = new Uri( config["OTEL_COLLECTOR_ENDPOINT"] );
+        opt.Endpoint = new Uri(config["OTEL_COLLECTOR_ENDPOINT"]);
     })
 );
 
