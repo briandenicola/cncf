@@ -11,4 +11,10 @@ spec:
     path: guestbook/
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: app01
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true    
