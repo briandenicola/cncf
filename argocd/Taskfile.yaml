@@ -41,14 +41,24 @@ tasks:
   deploy:
     desc: Deploys sample guessbook application to cluster 
     cmds:
-    - argocd app create guestbook --repo https://github.com/argoproj/argocd-example-apps.git --path guestbook --dest-namespace default --server localhost:8081 --insecure --port-forward-namespace argocd --dest-server https://kubernetes.default.svc
+    - task: login
+    - argocd app create guestbook --repo https://github.com/argoproj/argocd-example-apps.git --path guestbook --server localhost:8080 --insecure --dest-server https://kubernetes.default.svc --dest-namespace default --upsert --directory-recurse
+
+  login:
+    desc: Log into ArgoCD 
+    cmds:
+      - cmd: bold=$(tput bold); normal=$(tput sgr0); echo "»»»»💡Argo CD ${bold}admin${normal} password is ${bold}{{.ADMIN_PASSWORD}}${normal}"
+        silent: true
+      - cmd: argocd login localhost:8080 --username admin --password {{.ADMIN_PASSWORD}} --insecure
+        silent: true
+    vars:
+      ADMIN_PASSWORD: 
+        sh: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 
   port-forward:
-    desc: Display default password and forward Argo CD service to localhost
+    desc: Poirt Forward ArgoCD Admin service
     cmds:
-    - cmd: bold=$(tput bold); normal=$(tput sgr0); echo "»»»»💡Argo CD ${bold}admin${normal} password is ${bold}$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo)${normal}"
-      silent: true
-    - kubectl port-forward svc/argo-cd-repo-argocd-server -n argocd 8081:443
+    - kubectl port-forward svc/argo-cd-repo-argocd-server -n argocd 8080:443
 
   down:
     desc: Destroys all Azure resources and cleans up Terraform
