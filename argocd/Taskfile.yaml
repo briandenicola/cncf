@@ -3,6 +3,7 @@ version: '3'
 env: 
   TITLE: A ArgoCD demo environment
   DEFAULT_REGION: canadaeast
+
 tasks:
   default:
     cmds: 
@@ -42,7 +43,11 @@ tasks:
     desc: Deploys sample guessbook application to cluster 
     cmds:
     - task: login
-    - argocd app create guestbook --repo https://github.com/argoproj/argocd-example-apps.git --path guestbook --server localhost:8080 --insecure --dest-server https://kubernetes.default.svc --dest-namespace default --upsert --directory-recurse
+    - argocd app create guestbook --repo {{.REPO}} --path guestbook --server {{.ARGO}} --insecure --dest-server {{.K8S}} --dest-namespace default --upsert --directory-recurse
+    vars:
+      REPO: https://github.com/argoproj/argocd-example-apps.git
+      K8S: https://kubernetes.default.svc
+      ARGO: localhost:8080
 
   login:
     desc: Log into ArgoCD 
