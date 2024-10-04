@@ -1,6 +1,6 @@
 resource "helm_release" "argocd" {
   depends_on = [
-    azurerm_kubernetes_cluster.this,
+    data.azurerm_kubernetes_cluster.this
   ]
 
   name             = "argo-cd-repo"
@@ -17,7 +17,7 @@ resource "helm_release" "argocd" {
 
 resource "helm_release" "cert_manager" {
   depends_on = [
-    azurerm_kubernetes_cluster.this
+    data.azurerm_kubernetes_cluster.this
   ]
 
   name             = "jetstack"

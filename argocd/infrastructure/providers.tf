@@ -3,16 +3,16 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.38.0"
+      version = "~> 3"
     }
     azapi = {
       source  = "Azure/azapi"
-      version = "1.0.0"
+      version = "~> 1"
     }
-    helm = {
-      source = "hashicorp/helm"
-      version = "2.6.0"
-    }
+    # helm = {
+    #   source = "hashicorp/helm"
+    #   version = "~> 2"
+    # }
   }
 }
 
@@ -29,8 +29,8 @@ provider "azapi" {
 
 provider "helm" {
   kubernetes {
-    host                   = azurerm_kubernetes_cluster.this.kube_config.0.host
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.cluster_ca_certificate)
+    host                   = data.azurerm_kubernetes_cluster.this.kube_config.0.host
+    cluster_ca_certificate = base64decode(data.azurerm_kubernetes_cluster.this.kube_config.0.cluster_ca_certificate)
     
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
