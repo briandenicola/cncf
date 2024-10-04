@@ -3,10 +3,19 @@ data "azurerm_kubernetes_service_versions" "current" {
 }
 
 locals {
-  zones = var.region == "northcentralus" ? null : var.zones
+  zones = var.region == "canadaeast" || var.region == "northcentralus" ? null : var.zones
 }
 
 resource "azurerm_kubernetes_cluster" "this" {
+  depends_on = [
+    azurerm_user_assigned_identity.aks_identity,
+    azurerm_user_assigned_identity.aks_kubelet_identity,
+    azurerm_log_analytics_workspace.this,
+    azurerm_subnet.api,
+    azurerm_subnet.nodes,
+    azurerm_role_assignment.aks_role_assignemnt_network,
+    azurerm_role_assignment.aks_role_assignemnt_msi
+  ]
 
   lifecycle {
     ignore_changes = [
@@ -32,12 +41,12 @@ resource "azurerm_kubernetes_cluster" "this" {
   image_cleaner_interval_hours = 48
 
   automatic_channel_upgrade = "patch"
-  node_os_channel_upgrade   = "NodeImage"
+  node_os_channel_upgrade   = "SecurityPatch"
 
   api_server_access_profile {
     vnet_integration_enabled = true
     subnet_id                = azurerm_subnet.api.id
-    authorized_ip_ranges     = [var.authorized_ip_ranges]
+    authorized_ip_ranges     = var.authorized_ip_ranges
   }
 
   azure_active_directory_role_based_access_control {
@@ -65,20 +74,20 @@ resource "azurerm_kubernetes_cluster" "this" {
   }
 
   default_node_pool {
-    name                = "system"
-    node_count          = var.node_count
-    vm_size             = var.vm_sku
-    zones               = local.zones
-    os_disk_size_gb     = 127
-    vnet_subnet_id      = azurerm_subnet.nodes.id
-    os_sku              = var.vm_os
-    #os_disk_type        = "Ephemeral"
-    type                = "VirtualMachineScaleSets"
-    enable_auto_scaling = true
-    min_count           = 1
-    max_count           = var.node_count
-    max_pods            = 90
-    node_labels         = tomap(var.node_labels)
+    name                         = "system"
+    node_count                   = var.node_count
+    vm_size                      = var.vm_sku
+    zones                        = local.zones
+    os_disk_size_gb              = 127
+    vnet_subnet_id               = azurerm_subnet.nodes.id
+    os_sku                       = var.vm_os
+    type                         = "VirtualMachineScaleSets"
+    enable_auto_scaling          = true
+    min_count                    = 1
+    max_count                    = var.node_count
+    max_pods                     = 250
+    node_labels                  = tomap(var.node_labels)
+    only_critical_addons_enabled = var.only_critical_addons_enabled
 
     upgrade_settings {
       max_surge = "25%"
@@ -88,10 +97,11 @@ resource "azurerm_kubernetes_cluster" "this" {
   network_profile {
     dns_service_ip      = "100.${random_integer.services_cidr.id}.0.10"
     service_cidr        = "100.${random_integer.services_cidr.id}.0.0/16"
+    pod_cidr            = "100.${random_integer.pod_cidr.id}.0.0/16"
     network_plugin      = "azure"
     network_plugin_mode = "overlay"
     load_balancer_sku   = "standard"
-    pod_cidr            = "100.${random_integer.pod_cidr.id}.0.0/16"
+    
   }
 
   dynamic "service_mesh_profile" {
@@ -101,6 +111,34 @@ resource "azurerm_kubernetes_cluster" "this" {
       mode                             = "Istio"
       internal_ingress_gateway_enabled = true
     }
+  }
+
+  dynamic "storage_profile" {
+    for_each = var.enable_csi_drivers == true ? [true] : []
+
+    content {
+      blob_driver_enabled = true
+      disk_driver_enabled = true
+      file_driver_enabled = true
+    }
+  }
+
+  maintenance_window_auto_upgrade {
+    frequency   = "Weekly"
+    interval    = 1
+    duration    = 4
+    day_of_week = "Friday"
+    utc_offset  = "-06:00"
+    start_time  = "20:00"
+  }
+
+  maintenance_window_node_os {
+    frequency   = "Weekly"
+    interval    = 1
+    duration    = 4
+    day_of_week = "Saturday"
+    utc_offset  = "-06:00"
+    start_time  = "20:00"
   }
 
   auto_scaler_profile {
@@ -113,6 +151,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   oms_agent {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.this.id
+    msi_auth_for_monitoring_enabled = var.msi_auth_for_monitoring_enabled
   }
 
   monitor_metrics {
@@ -123,14 +162,8 @@ resource "azurerm_kubernetes_cluster" "this" {
   }
 
   key_vault_secrets_provider {
-    secret_rotation_enabled = true
+    secret_rotation_enabled  = true
+    secret_rotation_interval = "2m"
   }
-
-  storage_profile {
-    blob_driver_enabled = true
-    disk_driver_enabled = true
-    file_driver_enabled = true
-  }
-
 }
 

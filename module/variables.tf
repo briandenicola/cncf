@@ -5,6 +5,7 @@ variable "region" {
 
 variable "authorized_ip_ranges" {
   description = "Authorized IP ranges for accessing the cluster"
+  default     = null
 }
 
 variable "resource_name" {
@@ -15,36 +16,31 @@ variable "public_key_openssh" {
   description = "The public key to use for SSH access to the cluster"
 }
 
-variable "zones" {
-  description = "The availability zones to deploy AKS to"
-  default = ["1", "2", "3"]
-}
-
 variable "vm_sku" {
   description = "The value for the VM SKU"
   default     = "Standard_D4ads_v5"
-} 
+}
 
 variable "vm_os" {
   description = "The value for the VM OS"
-  default = "AzureLinux"
+  default     = "AzureLinux"
 }
 
 variable "sdlc_environment" {
   description = "The value for the sdlc environment"
 }
 
-variable kubernetes_version {
+variable "kubernetes_version" {
   description = "The version of Kubernetes to deploy"
 }
 
-variable automatic_channel_upgrade {
-  default     =  "patch"
+variable "automatic_channel_upgrade" {
+  default     = "patch"
   description = "The value for the automatic channel upgrade"
 }
 
-variable node_os_channel_upgrade {
-  default     =  "NodeImage"
+variable "node_os_channel_upgrade" {
+  default     = "NodeImage"
   description = "The value for the node OS channel upgrade"
 }
 
@@ -57,6 +53,11 @@ variable "enable_mesh" {
   default     = true
 }
 
+variable "enable_csi_drivers" {
+  description = "Enable CSI drivers"
+  default     = true
+}
+
 variable "node_labels" {
   description = "The labels to apply to the nodes"
   type        = map(string)
@@ -66,4 +67,20 @@ variable "node_labels" {
 variable "node_count" {
   description = "The node count for the default node pool"
   default     = 1
+}
+
+variable "zones" {
+  description = "The zones to deploy the cluster to"
+  type        = list(string)
+  default     = ["1", "2", "3"]
+}
+
+variable "only_critical_addons_enabled" {
+  description = "Enable only critical addons for default system pool"
+  default = false
+}
+
+variable "msi_auth_for_monitoring_enabled" {
+  description = "Enable MSI auth for monitoring"
+  default     = false
 }

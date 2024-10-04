@@ -47,21 +47,9 @@ resource "azurerm_subnet" "compute" {
 }
 
 resource "azurerm_network_security_group" "this" {
-  name                = local.default_nsg_name
+  name                = "${var.resource_name}-default-nsg"
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
-
-  security_rule {
-    name                       = "AllowHTTPInbound"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "80"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "nodes" {
